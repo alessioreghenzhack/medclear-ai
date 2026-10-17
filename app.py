@@ -37,7 +37,7 @@ st.set_page_config(
     page_title="MedClear AI — Clinical Discharge & Patient Navigator",
     page_icon="🩺",
     layout="wide",
-    initial_sidebar_state="expanded",
+    initial_sidebar_state="auto",
 )
 
 
@@ -1145,7 +1145,8 @@ def inject_custom_css(
             border-radius: 999px;
             font-size: 0.78rem;
             font-weight: 700;
-            white-space: nowrap;
+            white-space: normal;
+            line-height: 1.35;
         }}
         .telemetry-bar {{
             display: flex;
@@ -1221,11 +1222,13 @@ def inject_custom_css(
             justify-content: center;
             font-weight: 800;
             font-size: 0.9rem;
+            flex-shrink: 0;
         }}
         .step-title-text {{
             font-size: 1.2rem;
             font-weight: 800;
             color: {text_primary};
+            line-height: 1.3;
         }}
         .step-badge {{
             background: {dose_bg};
@@ -1278,6 +1281,7 @@ def inject_custom_css(
             padding: 0.12rem 0.45rem;
             border-radius: 6px;
             margin-right: 0.25rem;
+            margin-bottom: 0.25rem;
             font-size: 0.74rem;
             display: inline-block;
         }}
@@ -1408,6 +1412,7 @@ def inject_custom_css(
             padding: 22px;
             height: 100%;
             min-height: 270px;
+            margin-bottom: 0.85rem;
             box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
             transition: transform 0.2s ease;
             {rtl_rule}
@@ -1510,27 +1515,191 @@ def inject_custom_css(
             font-weight: 700;
         }}
 
-        div.stButton > button[kind="primary"] {{
+        div.stButton > button,
+        div.stDownloadButton > button {{
+            white-space: normal !important;
+            height: auto !important;
+            min-height: 46px !important;
+            line-height: 1.32 !important;
+            word-break: break-word !important;
+        }}
+
+        div.stButton > button[kind="primary"],
+        div.stDownloadButton > button[kind="primary"] {{
             background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
             color: #ffffff !important;
             border: none !important;
             border-radius: 14px !important;
-            padding: 0.8rem 1.5rem !important;
+            padding: 0.75rem 1.25rem !important;
             font-weight: 800 !important;
-            font-size: 1.03rem !important;
+            font-size: 1rem !important;
             box-shadow: 0 6px 18px rgba(2, 132, 199, 0.32) !important;
         }}
-        div.stButton > button[kind="secondary"] {{
+        div.stButton > button[kind="secondary"],
+        div.stDownloadButton > button[kind="secondary"] {{
             background: {bg_card} !important;
             color: {text_primary} !important;
             border: 1.5px solid {border_card} !important;
             border-radius: 12px !important;
-            padding: 0.65rem 1rem !important;
+            padding: 0.65rem 0.95rem !important;
             font-weight: 700 !important;
         }}
         div.stButton > button[kind="secondary"]:hover {{
             border-color: #0284c7 !important;
             color: #38bdf8 !important;
+        }}
+
+        /* =========================================================
+           RESPONSIVE DESIGN PER TABLET (iPad / max-width: 1024px)
+           ========================================================= */
+        @media (max-width: 1024px) {{
+            .block-container {{
+                padding-left: 1.4rem !important;
+                padding-right: 1.4rem !important;
+                padding-top: 1rem !important;
+            }}
+            .enterprise-hero {{
+                padding: 20px 22px 16px 22px !important;
+                border-radius: 16px !important;
+            }}
+            .hero-title {{
+                font-size: 1.42rem !important;
+            }}
+            .triage-card {{
+                min-height: auto !important;
+                height: auto !important;
+                margin-bottom: 0.85rem !important;
+            }}
+        }}
+
+        /* =========================================================
+           RESPONSIVE DESIGN PER MOBILE (iPhone / Smartphone <= 768px)
+           ========================================================= */
+        @media (max-width: 768px) {{
+            html, body, .stApp {{
+                overflow-x: hidden !important;
+            }}
+            .block-container {{
+                padding-left: 0.85rem !important;
+                padding-right: 0.85rem !important;
+                padding-top: 0.65rem !important;
+                padding-bottom: 2.5rem !important;
+            }}
+            .enterprise-hero {{
+                padding: 16px 15px 14px 15px !important;
+                border-radius: 15px !important;
+                margin-bottom: 0.9rem !important;
+            }}
+            .hero-top-row {{
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 0.65rem !important;
+                margin-bottom: 0.8rem !important;
+            }}
+            .hero-brand {{
+                gap: 0.75rem !important;
+                align-items: flex-start !important;
+            }}
+            .hero-logo-box {{
+                width: 44px !important;
+                height: 44px !important;
+                border-radius: 12px !important;
+                font-size: 1.45rem !important;
+            }}
+            .hero-title {{
+                font-size: 1.18rem !important;
+                line-height: 1.25 !important;
+            }}
+            .hero-subtitle {{
+                font-size: 0.81rem !important;
+                line-height: 1.38 !important;
+                margin-top: 0.25rem !important;
+            }}
+            .hero-engine-tag {{
+                font-size: 0.71rem !important;
+                padding: 0.4rem 0.7rem !important;
+                border-radius: 10px !important;
+                text-align: center !important;
+                width: 100% !important;
+                box-sizing: border-box !important;
+            }}
+            .telemetry-bar {{
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                gap: 0.42rem !important;
+                padding-top: 0.7rem !important;
+            }}
+            .telemetry-pill {{
+                font-size: 0.68rem !important;
+                padding: 0.34rem 0.5rem !important;
+                border-radius: 9px !important;
+                text-align: center !important;
+                line-height: 1.25 !important;
+                white-space: normal !important;
+                display: flex !important;
+                align-items: center !important;
+                justify-content: center !important;
+            }}
+            .step-header {{
+                margin: 1.1rem 0 0.65rem 0 !important;
+                gap: 0.4rem !important;
+            }}
+            .step-number {{
+                width: 26px !important;
+                height: 26px !important;
+                font-size: 0.8rem !important;
+            }}
+            .step-title-text {{
+                font-size: 1.02rem !important;
+            }}
+            .step-badge {{
+                font-size: 0.66rem !important;
+                padding: 0.2rem 0.55rem !important;
+            }}
+            .empathy-card {{
+                padding: 16px 15px !important;
+                border-radius: 14px !important;
+                border-left-width: 5px !important;
+            }}
+            .empathy-avatar {{
+                width: 40px !important;
+                height: 40px !important;
+                font-size: 1.3rem !important;
+            }}
+            .empathy-heading {{
+                font-size: 1rem !important;
+            }}
+            .empathy-subheading {{
+                font-size: 0.75rem !important;
+            }}
+            .modern-card {{
+                padding: 15px !important;
+                border-radius: 13px !important;
+            }}
+            .time-column-header {{
+                margin-top: 0.4rem !important;
+                margin-bottom: 0.5rem !important;
+                padding: 0.55rem 0.8rem !important;
+            }}
+            .med-minibox {{
+                padding: 13px !important;
+                margin-bottom: 0.65rem !important;
+            }}
+            .triage-card {{
+                padding: 16px !important;
+                min-height: auto !important;
+                height: auto !important;
+                margin-bottom: 0.75rem !important;
+            }}
+            .checklist-row, .doctor-q-box {{
+                padding: 0.75rem 0.85rem !important;
+            }}
+            div.stButton > button,
+            div.stDownloadButton > button {{
+                font-size: 0.88rem !important;
+                padding: 0.6rem 0.85rem !important;
+                margin-bottom: 0.2rem !important;
+            }}
         }}
         </style>
         """,
@@ -2584,16 +2753,16 @@ def render_interactive_tts_player(
 
     st.components.v1.html(
         f"""
-        <div style="font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 4px 0;">
+        <div style="font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 2px 0; margin: 0;">
             <button id="playBtn" onclick="speakSummary()"
-                style="background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border: none; border-radius: 12px; padding: 11px 18px; font-weight: 700; font-size: 0.92rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);">
+                style="flex: 1 1 auto; min-width: 180px; justify-content: center; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border: none; border-radius: 12px; padding: 10px 14px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);">
                 {html.escape(play_label)} ({lang_code})
             </button>
             <button onclick="stopSummary()"
-                style="background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 12px; padding: 11px 14px; font-weight: 700; font-size: 0.88rem; cursor: pointer;">
+                style="flex: 0 0 auto; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 14px; font-weight: 700; font-size: 0.86rem; cursor: pointer;">
                 {html.escape(stop_label)}
             </button>
-            <span id="ttsStatus" style="font-size: 0.82rem; color: #0284c7; font-weight: 700;"></span>
+            <span id="ttsStatus" style="font-size: 0.8rem; color: #0284c7; font-weight: 700;"></span>
         </div>
         <script>
         function speakSummary() {{
@@ -2619,7 +2788,7 @@ def render_interactive_tts_player(
         }}
         </script>
         """,
-        height=62,
+        height=72,
     )
 
 
@@ -2757,6 +2926,25 @@ def generate_printable_txt(
 # =====================================================================
 # INIZIALIZZAZIONE STATO SESSIONE
 # =====================================================================
+def _resolve_backend_api_key() -> str:
+    """Legge automaticamente la API Key da Streamlit Secrets (st.secrets) o variabili d'ambiente."""
+    try:
+        for k_name in ("EVOLUS_API_KEY", "GEMINI_API_KEY", "GOOGLE_API_KEY", "API_KEY", "evolus_api_key"):
+            if k_name in st.secrets and str(st.secrets[k_name]).strip():
+                return str(st.secrets[k_name]).strip()
+        for val in st.secrets.values():
+            if isinstance(val, str) and (val.strip().startswith("evo_") or val.strip().startswith("AIza")):
+                return val.strip()
+    except Exception:
+        pass
+    return (
+        os.environ.get("EVOLUS_API_KEY")
+        or os.environ.get("GEMINI_API_KEY")
+        or os.environ.get("GOOGLE_API_KEY")
+        or ""
+    ).strip()
+
+
 def init_session_state() -> None:
     if "medical_text" not in st.session_state:
         st.session_state.medical_text = DEMO_CASES["cardiologia"]["testo"]
@@ -2775,7 +2963,7 @@ def init_session_state() -> None:
     if "last_throughput" not in st.session_state:
         st.session_state.last_throughput = 134
     if "last_engine_used" not in st.session_state:
-        st.session_state.last_engine_used = "AMD Instinct™ MI300X / Gemini Hybrid"
+        st.session_state.last_engine_used = "Evolus Cloud on AMD Instinct™ MI300X"
     if "inference_count" not in st.session_state:
         st.session_state.inference_count = 1
     if "chat_messages" not in st.session_state:
@@ -2786,13 +2974,7 @@ def init_session_state() -> None:
         st.session_state.profile_idx = 0
     if "high_readability" not in st.session_state:
         st.session_state.high_readability = False
-    if "unified_api_key" not in st.session_state:
-        st.session_state.unified_api_key = (
-            os.environ.get("EVOLUS_API_KEY")
-            or os.environ.get("GEMINI_API_KEY")
-            or os.environ.get("GOOGLE_API_KEY")
-            or ""
-        )
+    st.session_state.unified_api_key = _resolve_backend_api_key()
     if "evolus_base_url" not in st.session_state:
         st.session_state.evolus_base_url = os.environ.get(
             "EVOLUS_BASE_URL", "https://api.evolus.ai/v1"
@@ -2819,16 +3001,6 @@ def main() -> None:
     ]
 
     # Callbacks di sincronizzazione bidirezionale tra Control Dock e Sidebar
-    def _sync_from_dock_key() -> None:
-        val = st.session_state.get("dock_api_key_input", "")
-        st.session_state.unified_api_key = val
-        st.session_state["sb_api_key_input"] = val
-
-    def _sync_from_sb_key() -> None:
-        val = st.session_state.get("sb_api_key_input", "")
-        st.session_state.unified_api_key = val
-        st.session_state["dock_api_key_input"] = val
-
     def _sync_from_dock_lang() -> None:
         val = st.session_state.get("dock_lang_select", "🇮🇹 Italiano")
         if val != st.session_state.output_language:
@@ -2891,19 +3063,7 @@ def main() -> None:
         st.session_state.selected_model = val
         st.session_state["dock_model_select"] = val
 
-    def _sync_from_dock_url() -> None:
-        val = st.session_state.get("dock_base_url_input", "https://api.evolus.ai/v1")
-        st.session_state.evolus_base_url = val
-        st.session_state["sb_base_url_input"] = val
-
-    def _sync_from_sb_url() -> None:
-        val = st.session_state.get("sb_base_url_input", "https://api.evolus.ai/v1")
-        st.session_state.evolus_base_url = val
-        st.session_state["dock_base_url_input"] = val
-
     # Assicura che le chiavi widget di Dock e Sidebar siano sempre allineate allo stato canonico
-    st.session_state["dock_api_key_input"] = st.session_state.unified_api_key
-    st.session_state["sb_api_key_input"] = st.session_state.unified_api_key
     st.session_state["dock_lang_select"] = st.session_state.output_language
     st.session_state["sb_lang_select"] = st.session_state.output_language
     st.session_state["dock_profile_select"] = st.session_state.profile_idx
@@ -2914,8 +3074,6 @@ def main() -> None:
     st.session_state["sb_big_font_toggle"] = st.session_state.high_readability
     st.session_state["dock_model_select"] = st.session_state.selected_model
     st.session_state["sb_model_select"] = st.session_state.selected_model
-    st.session_state["dock_base_url_input"] = st.session_state.evolus_base_url
-    st.session_state["sb_base_url_input"] = st.session_state.evolus_base_url
 
     # Carica tutte le stringhe dell'interfaccia nella lingua attiva
     current_lang_cfg = LANGUAGES_CONFIG.get(
@@ -2980,31 +3138,12 @@ def main() -> None:
     )
 
     # -----------------------------------------------------------------
-    # BARRA DI CONTROLLO RAPIDA (CONTROL DOCK) TRADOTTA NELLA LINGUA SCELTA
+    # BARRA DI CONTROLLO RAPIDA (CONTROL DOCK) PULITA E AUTOMATICA
     # -----------------------------------------------------------------
     with st.expander(ui["dock_title"], expanded=True):
-        dock_col1, dock_col2, dock_col3, dock_col4 = st.columns([1.35, 1.15, 1.25, 1.1])
+        dock_col1, dock_col2, dock_col3 = st.columns([1.25, 1.25, 1.25])
 
         with dock_col1:
-            st.text_input(
-                ui["api_label"],
-                type="password",
-                placeholder=ui["api_placeholder"],
-                key="dock_api_key_input",
-                on_change=_sync_from_dock_key,
-            )
-
-            k_trim = st.session_state.unified_api_key.strip()
-            if k_trim.startswith("evo_"):
-                st.success(ui["status_evolus"])
-            elif k_trim.startswith("AIza"):
-                st.success(ui["status_gemini"])
-            elif k_trim:
-                st.info(ui["status_custom"])
-            else:
-                st.info(ui["status_demo"])
-
-        with dock_col2:
             st.selectbox(
                 ui["lang_label"],
                 options=lang_options,
@@ -3020,7 +3159,7 @@ def main() -> None:
                 on_change=_sync_from_dock_prof,
             )
 
-        with dock_col3:
+        with dock_col2:
             st.selectbox(
                 ui["theme_label"],
                 options=[0, 1, 2],
@@ -3035,22 +3174,17 @@ def main() -> None:
                 on_change=_sync_from_dock_font,
             )
 
-        with dock_col4:
+        with dock_col3:
             st.selectbox(
                 ui["model_label"],
                 options=model_options,
                 key="dock_model_select",
                 on_change=_sync_from_dock_model,
             )
-
-            st.text_input(
-                ui["url_label"],
-                key="dock_base_url_input",
-                on_change=_sync_from_dock_url,
-            )
+            st.success(ui["status_evolus"])
 
     # -----------------------------------------------------------------
-    # SIDEBAR SINCRONIZZATA E INTERAMENTE TRADOTTA
+    # SIDEBAR SINCRONIZZATA E INTERAMENTE TRADOTTA (SENZA CAMPO API KEY)
     # -----------------------------------------------------------------
     with st.sidebar:
         st.markdown(f"### {ui['theme_label']}")
@@ -3072,29 +3206,7 @@ def main() -> None:
         st.divider()
 
         st.markdown("### ⚡ Hybrid AI Engine")
-        st.text_input(
-            ui["api_label"],
-            type="password",
-            placeholder=ui["api_placeholder"],
-            key="sb_api_key_input",
-            on_change=_sync_from_sb_key,
-        )
-
-        key_trimmed = st.session_state.unified_api_key.strip()
-        if key_trimmed.startswith("evo_"):
-            st.success(ui["status_evolus"])
-        elif key_trimmed.startswith("AIza"):
-            st.success(ui["status_gemini"])
-        elif key_trimmed:
-            st.info(ui["status_custom"])
-        else:
-            st.info(ui["status_demo"])
-
-        st.text_input(
-            ui["url_label"],
-            key="sb_base_url_input",
-            on_change=_sync_from_sb_url,
-        )
+        st.success(ui["status_evolus"])
 
         st.selectbox(
             ui["model_label"],
