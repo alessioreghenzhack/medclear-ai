@@ -1064,12 +1064,18 @@ def inject_custom_css(
             display: none !important;
         }}
 
+        :root, html, body, .stApp {{
+            color-scheme: {"dark" if is_dark else "light"} !important;
+        }}
         html, body, [class*="css"] {{
             font-family: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif !important;
             color: {text_primary};
         }}
-        .stApp {{
+        .stApp,
+        [data-testid="stAppViewContainer"],
+        [data-testid="stMain"] {{
             background-color: {bg_page} !important;
+            background: {bg_page} !important;
             color: {text_primary} !important;
         }}
         .block-container {{
@@ -1078,19 +1084,27 @@ def inject_custom_css(
             max-width: 1320px !important;
         }}
 
-        [data-testid="stSidebar"] {{
+        [data-testid="stSidebar"],
+        [data-testid="stSidebar"] > div {{
+            background-color: {sidebar_bg} !important;
             background: {sidebar_bg} !important;
             border-right: 1px solid {border_card} !important;
         }}
-        [data-testid="stSidebar"] * {{
-            color: {text_primary};
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] p,
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] li,
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h1,
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h2,
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h3,
+        [data-testid="stSidebar"] [data-testid="stMarkdownContainer"] h4,
+        [data-testid="stSidebar"] label {{
+            color: {text_primary} !important;
         }}
 
         .enterprise-hero {{
-            background: linear-gradient(135deg, #0f172a 0%, #0369a1 100%);
+            background: linear-gradient(135deg, #0f172a 0%, #0369a1 100%) !important;
             border-radius: 20px;
             padding: 26px 30px 20px 30px;
-            color: #ffffff;
+            color: #ffffff !important;
             box-shadow: 0 12px 32px rgba(3, 105, 161, 0.22);
             margin-bottom: 1.2rem;
             border: 1px solid rgba(56, 189, 248, 0.35);
@@ -1121,6 +1135,7 @@ def inject_custom_css(
             font-size: 1.95rem;
             flex-shrink: 0;
         }}
+        .enterprise-hero .hero-title,
         .hero-title {{
             font-size: 1.72rem;
             font-weight: 800;
@@ -1128,18 +1143,21 @@ def inject_custom_css(
             margin: 0;
             letter-spacing: -0.02em;
         }}
+        .enterprise-hero .hero-title span,
         .hero-title span {{
-            color: #38bdf8;
+            color: #38bdf8 !important;
         }}
+        .enterprise-hero .hero-subtitle,
         .hero-subtitle {{
             font-size: 0.94rem;
             color: #e0f2fe !important;
             margin: 0.3rem 0 0 0;
             max-width: 760px;
         }}
+        .enterprise-hero .hero-engine-tag,
         .hero-engine-tag {{
-            background: rgba(15, 23, 42, 0.72);
-            border: 1px solid #38bdf8;
+            background: rgba(15, 23, 42, 0.72) !important;
+            border: 1px solid #38bdf8 !important;
             color: #f0f9ff !important;
             padding: 0.48rem 0.95rem;
             border-radius: 999px;
@@ -1155,9 +1173,10 @@ def inject_custom_css(
             padding-top: 0.95rem;
             border-top: 1px solid rgba(255, 255, 255, 0.16);
         }}
+        .enterprise-hero .telemetry-pill,
         .telemetry-pill {{
-            background: rgba(15, 23, 42, 0.58);
-            border: 1px solid rgba(186, 230, 253, 0.3);
+            background: rgba(15, 23, 42, 0.58) !important;
+            border: 1px solid rgba(186, 230, 253, 0.3) !important;
             color: #f8fafc !important;
             padding: 0.4rem 0.85rem;
             border-radius: 999px;
@@ -1166,7 +1185,7 @@ def inject_custom_css(
         }}
 
         .colorblind-banner {{
-            background: linear-gradient(90deg, #0072B2 0%, #0369a1 100%);
+            background: linear-gradient(90deg, #0072B2 0%, #0369a1 100%) !important;
             color: #ffffff !important;
             border: 2px solid #E69F00;
             border-radius: 14px;
@@ -1180,6 +1199,10 @@ def inject_custom_css(
             flex-wrap: wrap;
             gap: 0.5rem;
             box-shadow: 0 4px 16px rgba(0, 114, 178, 0.25);
+        }}
+        .colorblind-banner span,
+        .colorblind-banner div {{
+            color: #ffffff !important;
         }}
 
         .modern-card {{
@@ -1516,28 +1539,36 @@ def inject_custom_css(
         }}
 
         /* =========================================================
-           STYLING COMPLETO COMPONENTI NATIVI STREAMLIT (DARK & LIGHT)
-           Elimina qualsiasi box bianco residuo in Dark Mode!
+           STYLING COMPLETO COMPONENTI NATIVI STREAMLIT (LIGHT & DARK)
+           Garantisce colori coerenti sia con sistema operativo in
+           Light Mode sia con sistema operativo/browser in Dark Mode
            ========================================================= */
         [data-testid="stWidgetLabel"] p,
         [data-testid="stWidgetLabel"] span,
-        label,
-        .stMarkdown p,
-        .stMarkdown li,
-        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5 {{
+        [data-testid="stWidgetLabel"] label,
+        [data-testid="stCaptionContainer"] p {{
             color: {text_primary} !important;
+        }}
+
+        /* Evita che i path invisibili (fill="none") delle icone SVG diventino quadrati neri */
+        svg path[fill="none"],
+        svg rect[fill="none"] {{
+            fill: none !important;
         }}
 
         /* Expander (Pannello di Controllo Rapido & Testo Originale) */
         [data-testid="stExpander"],
         [data-testid="stExpander"] details {{
+            background: {bg_card} !important;
             background-color: {bg_card} !important;
             border: 1px solid {border_card} !important;
             border-radius: 14px !important;
             color: {text_primary} !important;
         }}
         [data-testid="stExpander"] summary,
-        [data-testid="stExpander"] summary:hover {{
+        [data-testid="stExpander"] summary:hover,
+        [data-testid="stExpander"] summary:focus {{
+            background: {bg_card} !important;
             background-color: {bg_card} !important;
             color: {text_primary} !important;
             border-radius: 14px !important;
@@ -1546,18 +1577,22 @@ def inject_custom_css(
         [data-testid="stExpander"] summary span,
         [data-testid="stExpander"] summary svg {{
             color: {text_primary} !important;
-            fill: {text_primary} !important;
         }}
         [data-testid="stExpanderDetails"] {{
+            background: {bg_card} !important;
             background-color: {bg_card} !important;
             color: {text_primary} !important;
             border-top: 1px solid {border_card} !important;
+            border-bottom-left-radius: 14px !important;
+            border-bottom-right-radius: 14px !important;
         }}
 
         /* Selectbox, TextInput e Menu a Tendina (BaseWeb) */
+        [data-testid="stSelectbox"] div[data-baseweb="select"],
         div[data-baseweb="select"] > div,
         div[data-baseweb="base-input"],
         div[data-baseweb="input"] {{
+            background: {bg_subcard} !important;
             background-color: {bg_subcard} !important;
             color: {text_primary} !important;
             border-color: {border_card} !important;
@@ -1565,35 +1600,53 @@ def inject_custom_css(
         }}
         div[data-baseweb="select"] span,
         div[data-baseweb="select"] div,
+        div[data-baseweb="select"] input,
         div[data-baseweb="select"] svg {{
             color: {text_primary} !important;
-            fill: {text_primary} !important;
         }}
         div[data-baseweb="popover"],
+        div[data-baseweb="popover"] > div,
         div[data-baseweb="menu"],
+        [data-testid="stSelectboxVirtualDropdown"],
         ul[role="listbox"],
         div[role="listbox"] {{
+            background: {bg_card} !important;
             background-color: {bg_card} !important;
             color: {text_primary} !important;
             border: 1px solid {border_card} !important;
         }}
         li[role="option"],
         div[role="option"] {{
+            background: {bg_card} !important;
             background-color: {bg_card} !important;
             color: {text_primary} !important;
+        }}
+        li[role="option"] span,
+        li[role="option"] div,
+        div[role="option"] span,
+        div[role="option"] div {{
+            color: inherit !important;
         }}
         li[role="option"]:hover,
         li[role="option"][aria-selected="true"],
         div[role="option"]:hover {{
+            background: {dose_bg} !important;
             background-color: {dose_bg} !important;
             color: {dose_text} !important;
         }}
 
-        /* TextArea (Editor Lettera di Dimissione) */
+        /* TextArea (Editor Lettera di Dimissione) & TextInput */
+        [data-testid="stTextArea"],
+        [data-testid="stTextAreaRootElement"] {{
+            border-radius: 12px !important;
+        }}
+        [data-testid="stTextArea"] div[data-baseweb="textarea"],
+        [data-testid="stTextArea"] div[data-baseweb="base-input"],
         div[data-baseweb="textarea"],
         div[data-baseweb="textarea"] > div,
         .stTextArea textarea,
         .stTextInput input {{
+            background: {bg_subcard} !important;
             background-color: {bg_subcard} !important;
             color: {text_primary} !important;
             -webkit-text-fill-color: {text_primary} !important;
@@ -1601,11 +1654,17 @@ def inject_custom_css(
             caret-color: {text_primary} !important;
             border-radius: 12px !important;
         }}
+        .stTextArea textarea::placeholder,
+        .stTextInput input::placeholder {{
+            color: {text_secondary} !important;
+            -webkit-text-fill-color: {text_secondary} !important;
+            opacity: 1 !important;
+        }}
 
         /* File Uploader PDF (Dropzone e Bottone Browse files) */
-        [data-testid="stFileUploader"],
-        [data-testid="stFileUploaderDropzone"],
-        [data-testid="stFileUploader"] section {{
+        [data-testid="stFileUploader"] section,
+        [data-testid="stFileUploaderDropzone"] {{
+            background: {bg_subcard} !important;
             background-color: {bg_subcard} !important;
             color: {text_primary} !important;
             border: 1.5px dashed {border_card} !important;
@@ -1616,29 +1675,44 @@ def inject_custom_css(
         [data-testid="stFileUploaderDropzone"] small,
         [data-testid="stFileUploaderDropzone"] svg {{
             color: {text_secondary} !important;
-            fill: {text_secondary} !important;
         }}
-        [data-testid="stFileUploaderDropzone"] button {{
+        [data-testid="stFileUploaderDropzone"] button,
+        [data-testid="stFileUploaderDropzone"] [data-testid="stBaseButton-secondary"] {{
+            background: {bg_card} !important;
             background-color: {bg_card} !important;
             color: {text_primary} !important;
             border: 1px solid {border_card} !important;
             border-radius: 10px !important;
+        }}
+        [data-testid="stFileUploaderDropzone"] button span,
+        [data-testid="stFileUploaderDropzone"] button p {{
+            color: {text_primary} !important;
         }}
 
         /* Code Block (Testo Medico Originale nell'Expander) */
         [data-testid="stCodeBlock"],
         [data-testid="stCode"],
         .stCode pre,
+        [data-testid="stCodeBlock"] pre,
+        [data-testid="stCodeBlock"] code,
         pre,
         code {{
+            background: {bg_subcard} !important;
             background-color: {bg_subcard} !important;
             color: {text_primary} !important;
             border: 1px solid {border_card} !important;
             border-radius: 10px !important;
         }}
+        [data-testid="stCodeBlock"] pre span,
+        [data-testid="stCodeBlock"] code span,
+        pre span,
+        code span {{
+            color: {text_primary} !important;
+        }}
 
         /* Chat Messages & Chat Input (Barra inferiore fissa) */
         [data-testid="stChatMessage"] {{
+            background: {bg_card} !important;
             background-color: {bg_card} !important;
             border: 1px solid {border_card} !important;
             border-radius: 14px !important;
@@ -1649,36 +1723,56 @@ def inject_custom_css(
         [data-testid="stChatMessage"] p,
         [data-testid="stChatMessage"] li,
         [data-testid="stChatMessage"] span,
+        [data-testid="stChatMessage"] div,
         [data-testid="stChatMessage"] strong {{
             color: {text_primary} !important;
         }}
         [data-testid="stBottom"],
         [data-testid="stBottom"] > div,
         [data-testid="stBottomBlockContainer"] {{
-            background-color: {bg_page} !important;
             background: {bg_page} !important;
+            background-color: {bg_page} !important;
         }}
         [data-testid="stChatInput"],
         [data-testid="stChatInput"] > div,
-        [data-testid="stChatInputContainer"] {{
+        [data-testid="stChatInputContainer"],
+        [data-testid="stChatInput"] div[data-baseweb="textarea"],
+        [data-testid="stChatInput"] div[data-baseweb="base-input"] {{
+            background: {bg_subcard} !important;
             background-color: {bg_subcard} !important;
             border-color: {border_card} !important;
             color: {text_primary} !important;
             border-radius: 14px !important;
         }}
-        [data-testid="stChatInput"] textarea {{
+        [data-testid="stChatInput"] textarea,
+        [data-testid="stChatInputTextArea"] {{
+            background: transparent !important;
             background-color: transparent !important;
             color: {text_primary} !important;
             -webkit-text-fill-color: {text_primary} !important;
             caret-color: {text_primary} !important;
         }}
-        [data-testid="stChatInput"] textarea::placeholder {{
+        [data-testid="stChatInput"] textarea::placeholder,
+        [data-testid="stChatInputTextArea"]::placeholder {{
             color: {text_secondary} !important;
             -webkit-text-fill-color: {text_secondary} !important;
+            opacity: 1 !important;
+        }}
+        [data-testid="stChatInputSubmitButton"] {{
+            background: transparent !important;
+            background-color: transparent !important;
+            color: #0284c7 !important;
+        }}
+        [data-testid="stChatInputSubmitButton"] svg {{
+            color: #0284c7 !important;
+            fill: currentColor !important;
         }}
 
-        div.stButton > button,
-        div.stDownloadButton > button {{
+        /* Bottoni (st.button e st.download_button - compatibile con wrapper Tooltip di Streamlit 1.50) */
+        div.stButton button,
+        div.stDownloadButton button,
+        [data-testid="stBaseButton-primary"],
+        [data-testid="stBaseButton-secondary"] {{
             white-space: normal !important;
             height: auto !important;
             min-height: 46px !important;
@@ -1686,9 +1780,11 @@ def inject_custom_css(
             word-break: break-word !important;
         }}
 
-        div.stButton > button[kind="primary"],
-        div.stDownloadButton > button[kind="primary"] {{
+        div.stButton button[kind="primary"],
+        div.stDownloadButton button[kind="primary"],
+        [data-testid="stBaseButton-primary"] {{
             background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%) !important;
+            background-color: #0284c7 !important;
             color: #ffffff !important;
             border: none !important;
             border-radius: 14px !important;
@@ -1697,18 +1793,55 @@ def inject_custom_css(
             font-size: 1rem !important;
             box-shadow: 0 6px 18px rgba(2, 132, 199, 0.32) !important;
         }}
-        div.stButton > button[kind="secondary"],
-        div.stDownloadButton > button[kind="secondary"] {{
+        div.stButton button[kind="primary"] p,
+        div.stButton button[kind="primary"] span,
+        div.stButton button[kind="primary"] div,
+        div.stDownloadButton button[kind="primary"] p,
+        div.stDownloadButton button[kind="primary"] span,
+        div.stDownloadButton button[kind="primary"] div,
+        [data-testid="stBaseButton-primary"] p,
+        [data-testid="stBaseButton-primary"] span,
+        [data-testid="stBaseButton-primary"] div {{
+            color: #ffffff !important;
+        }}
+
+        div.stButton button[kind="secondary"],
+        div.stDownloadButton button[kind="secondary"],
+        [data-testid="stBaseButton-secondary"] {{
             background: {bg_card} !important;
+            background-color: {bg_card} !important;
             color: {text_primary} !important;
             border: 1.5px solid {border_card} !important;
             border-radius: 12px !important;
             padding: 0.65rem 0.95rem !important;
             font-weight: 700 !important;
         }}
-        div.stButton > button[kind="secondary"]:hover {{
+        div.stButton button[kind="secondary"] p,
+        div.stButton button[kind="secondary"] span,
+        div.stButton button[kind="secondary"] div,
+        div.stDownloadButton button[kind="secondary"] p,
+        div.stDownloadButton button[kind="secondary"] span,
+        div.stDownloadButton button[kind="secondary"] div,
+        [data-testid="stBaseButton-secondary"] p,
+        [data-testid="stBaseButton-secondary"] span,
+        [data-testid="stBaseButton-secondary"] div {{
+            color: {text_primary} !important;
+        }}
+        div.stButton button[kind="secondary"]:hover,
+        div.stDownloadButton button[kind="secondary"]:hover,
+        [data-testid="stBaseButton-secondary"]:hover {{
+            background: {bg_subcard} !important;
+            background-color: {bg_subcard} !important;
             border-color: #0284c7 !important;
-            color: #38bdf8 !important;
+            color: {"#38bdf8" if is_dark else "#0284c7"} !important;
+        }}
+        div.stButton button[kind="secondary"]:hover p,
+        div.stButton button[kind="secondary"]:hover span,
+        div.stDownloadButton button[kind="secondary"]:hover p,
+        div.stDownloadButton button[kind="secondary"]:hover span,
+        [data-testid="stBaseButton-secondary"]:hover p,
+        [data-testid="stBaseButton-secondary"]:hover span {{
+            color: {"#38bdf8" if is_dark else "#0284c7"} !important;
         }}
 
         /* =========================================================
@@ -1856,8 +1989,8 @@ def inject_custom_css(
             .checklist-row, .doctor-q-box {{
                 padding: 0.75rem 0.85rem !important;
             }}
-            div.stButton > button,
-            div.stDownloadButton > button {{
+            div.stButton button,
+            div.stDownloadButton button {{
                 font-size: 0.88rem !important;
                 padding: 0.6rem 0.85rem !important;
                 margin-bottom: 0.2rem !important;
