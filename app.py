@@ -2368,6 +2368,516 @@ def localize_dosage_string(dosage: str, lang_code: str) -> str:
     return out
 
 
+# =====================================================================
+# MOTORE NLP CLINICO DINAMICO PER QUALSIASI PDF / REFERTO CARICATO
+# Estrae diagnosi, esiti, valori, farmaci, orari, controlli e semaforo
+# direttamente dal testo reale del PDF caricato dall'utente.
+# =====================================================================
+CLINICAL_JARGON_MAP_IT: List[Tuple[str, str]] = [
+    ("dispnea", "mancanza di fiato / respiro affannoso"),
+    ("cardiopalmo", "percezione di battito cardiaco accelerato o irregolare"),
+    ("fibrillazione atriale", "ritmo del cuore rapido e irregolare"),
+    ("tachicardia", "battito cardiaco accelerato"),
+    ("bradicardia", "battito cardiaco lento"),
+    ("ipertensione", "pressione del sangue alta"),
+    ("ipotensione", "pressione del sangue bassa"),
+    ("edema", "gonfiore dovuto a ritenzione di liquidi"),
+    ("edemi declivi", "gonfiore a caviglie e gambe"),
+    ("iperglicemia", "livelli elevati di zucchero (glucosio) nel sangue"),
+    ("ipoglicemia", "abbassamento degli zuccheri nel sangue"),
+    ("dislipidemia", "valori elevati di colesterolo o trigliceridi nel sangue"),
+    ("ipercolesterolemia", "colesterolo alto nel sangue"),
+    ("steatosi", "accumulo benigno di grasso (es. nel fegato)"),
+    ("flogosi", "infiammazione"),
+    ("flogistico", "infiammatorio"),
+    ("piressia", "febbre"),
+    ("iperpiressia", "febbre alta"),
+    ("apirettico", "senza febbre"),
+    ("astenia", "stanchezza e debolezza generale"),
+    ("cefalea", "mal di testa"),
+    ("vertigini", "sensazione di instabilità o giramento di testa"),
+    ("sincope", "svenimento temporaneo"),
+    ("epigastralgia", "dolore o bruciore alla bocca dello stomaco"),
+    ("gastrite", "infiammazione della parete dello stomaco"),
+    ("reflusso", "risalita di acido dallo stomaco verso l'esofago"),
+    ("mrge", "malattia da reflusso gastroesofageo"),
+    ("lombalgia", "dolore nella parte bassa della schiena"),
+    ("lombosciatalgia", "dolore alla schiena che scende lungo il nervo sciatico"),
+    ("cervicalgia", "dolore e tensione al collo"),
+    ("discopatia", "sofferenza o usura di un disco tra le vertebre"),
+    ("protrusione", "sporgenza di un disco intervertebrale"),
+    ("ernia", "fuoriuscita parziale di tessuto o disco intervertebrale"),
+    ("artrosi", "usura naturale della cartilagine articolare"),
+    ("gonartrosi", "artrosi del ginocchio"),
+    ("coxartrosi", "artrosi dell'anca"),
+    ("frattura", "rottura o lesione dell'osso"),
+    ("infrazione", "piccola incrinatura dell'osso"),
+    ("distorsione", "trauma ai legamenti di un'articolazione"),
+    ("contusione", "trauma dei tessuti molli senza rottura ossea"),
+    ("versamento", "raccolta localizzata di liquido infiammatorio"),
+    ("litiasi", "presenza di piccoli calcoli"),
+    ("calcolosi", "presenza di calcoli (es. renali o della colecisti)"),
+    ("anemia", "riduzione dell'emoglobina / globuli rossi nel sangue"),
+    ("leucocitosi", "aumento dei globuli bianchi (indice di risposta infiammatoria)"),
+    ("pcr", "Proteina C Reattiva (indice di infiammazione nel sangue)"),
+    ("insufficienza renale", "affaticamento dei reni nel filtrare il sangue"),
+    ("ipotiroidismo", "tiroide che lavora più lentamente"),
+    ("ipertiroidismo", "tiroide che lavora in modo accelerato"),
+    ("bronchite", "infiammazione dei bronchi"),
+    ("polmonite", "infezione del tessuto polmonare"),
+    ("broncospasmo", "restringimento temporaneo dei bronchi"),
+    ("cistite", "infiammazione/infezione delle vie urinarie"),
+    ("ematuria", "presenza di tracce di sangue nelle urine"),
+    ("disuria", "bruciore o fastidio mentre si urina"),
+]
+
+DRUG_KNOWLEDGE_BASE: List[Tuple[List[str], str, str, str]] = [
+    (
+        ["pantoprazolo", "pantorc", "omeprazolo", "antra", "lansoprazolo", "lansox", "esomeprazolo", "lucen", "nexium", "rabeprazolo"],
+        "Mattina",
+        "Protegge lo stomaco riducendo l'acidità gastrica",
+        "Assumere al mattino a digiuno (circa 20-30 minuti prima della colazione).",
+    ),
+    (
+        ["gaviscon", "maalox", "riopan", " Bianacid", "neobianacid", "reflumil", "marial", "esoxx"],
+        "Sera",
+        "Crea una barriera protettiva contro bruciore di stomaco e reflusso",
+        "Assumere dopo i pasti principali e prima di coricarsi.",
+    ),
+    (
+        ["amoxicillina", "augmentin", "clavulin", "zimox", "velamox", "claritromicina", "klacid", "azitromicina", "zitromax", "ciprofloxacina", "ciproxin", "levofloxacina", "levoxacin", "cefixima", "ceftriaxone", "rocefin", "fosfomicina", "monuril", "antibiotic"],
+        "Mattina",
+        "Antibiotico per eliminare l'infezione batterica",
+        "Completare sempre tutti i giorni di cura prescritti dal medico rispettando gli orari.",
+    ),
+    (
+        ["paracetamolo", "tachipirina", "efferalgan", "tachifludec"],
+        "Al Bisogno",
+        "Calma il dolore e abbassa la febbre",
+        "Assumere in caso di dolore o febbre, attendendo almeno 6-8 ore tra una dose e l'altra.",
+    ),
+    (
+        ["ibuprofene", "brufen", "moment", "nurofen", "ketoprofene", "oki", "okask", "diclofenac", "voltaren", "naprossene", "momendol", "synflex", "etoricoxib", "arcoxia", "celecoxib", "ketorolac", "toradol", "indometacina", "fans"],
+        "Pranzo",
+        "Antinfiammatorio per ridurre dolore, gonfiore e infiammazione",
+        "Assumere SEMPRE a stomaco pieno (dopo i pasti) per non irritare lo stomaco.",
+    ),
+    (
+        ["prednisone", "deltacortene", "betametasone", "bentelan", "metilprednisolone", "medrol", "deflazacort", "deflan", "cortison", "desametasone"],
+        "Mattina",
+        "Cortisonico che riduce rapidamente l'infiammazione e il gonfiore",
+        "Assumere preferibilmente al mattino dopo colazione; non sospendere bruscamente se prescritto a scalare.",
+    ),
+    (
+        ["bisoprololo", "congor", "cardicor", "sequacor", "metoprololo", "nebivololo", "lobivon", "carvedilolo", "dilatrend", "atenololo", "sotalolo"],
+        "Mattina",
+        "Mantiene il battito cardiaco calmo e regolare e protegge il cuore",
+        "Assumere al mattino dopo colazione; controllare periodicamente pressione e battiti.",
+    ),
+    (
+        ["ramipril", "triatec", "enalapril", "enapren", "perindopril", "coversyl", "lisinopril", "olmesartan", "olpress", "valsartan", "tareg", "losartan", "irbesartan", "aprovel", "candesartan", "blopress", "telmisartan", "micardis", "amlodipina", "norvasc", "lercanidipina", "zanedip", "nifedipina", "adalat", "entresto"],
+        "Mattina",
+        "Regola la pressione del sangue e protegge cuore e vasi sanguigni",
+        "Assumere con regolarità; alzarsi lentamente dal letto per evitare lievi capogiri.",
+    ),
+    (
+        ["furosemide", "lasix", "torasemide", "diuresix", "idroclorotiazide", "esidrex", "spironolattone", "kanrenol", "luvion"],
+        "Mattina",
+        "Diuretico che aiuta ad eliminare i liquidi in eccesso",
+        "Assumere al mattino o primo pomeriggio per non disturbare il riposo notturno.",
+    ),
+    (
+        ["apixaban", "eliquis", "rivaroxaban", "xarelto", "dabigatran", "pradaxa", "edoxaban", "lixiana", "warfarin", "coumadin", "acido acetilsalicilico", "cardioaspirin", "aspirinetta", "clopidogrel", "plavix", "ticagrelor", "brilique"],
+        "Mattina",
+        "Fluidifica il sangue per prevenire la formazione di coaguli e trombi",
+        "Assumere con massima puntualità; non associare antinfiammatori senza parere medico.",
+    ),
+    (
+        ["enoxaparina", "clexane", "inhixa", "fondaparinux", "arixtra", "nadroparina", "seleparina", "parnaparina", "fluxum", "eparina"],
+        "Sera",
+        "Eparina sottocute per prevenire trombosi e coaguli nelle vene",
+        "Iniezione sottocutanea nella plica dell'addome sempre alla stessa ora.",
+    ),
+    (
+        ["atorvastatina", "torvast", "rosuvastatina", "crestor", "simvastatina", "sivastin", "pravastatina", "ezetimibe", "zetia", "inegy"],
+        "Sera",
+        "Riduce il colesterolo nel sangue e protegge le arterie",
+        "Assumere regolarmente alla sera (dopo cena o prima di dormire).",
+    ),
+    (
+        ["metformina", "glucophage", "slowmet", "empagliflozin", "jardiance", "dapagliflozin", "forxiga", "semaglutide", "ozempic", "rybelsus", "sitagliptin", "januvia", "gliclazide", "glimepiride", "insulina", "lantus", "toujeo", "humalog", "novorapid"],
+        "Mattina",
+        "Mantiene sotto controllo i livelli di zucchero (glicemia) nel sangue",
+        "Seguire attentamente l'abbinamento con i pasti e la dieta indicata dal medico.",
+    ),
+    (
+        ["levotiroxina", "eutirox", "tirosint", "tiche"],
+        "Mattina",
+        "Integra l'ormone tiroideo per il corretto metabolismo dell'organismo",
+        "Assumere al mattino a digiuno, attendendo 30 minuti prima di fare colazione.",
+    ),
+    (
+        ["salbutamolo", "ventolin", "broncovaleas", "foster", "symbicort", "relvar", "spiriva", "tiotropio", "clenil", "beclometasone", "budesonide", "aresol", "aerosol"],
+        "Mattina",
+        "Apre e disinfiamma le vie respiratorie facilitando il respiro",
+        "Inalare seguendo la tecnica corretta; sciacquare la bocca se contiene cortisonico.",
+    ),
+    (
+        ["acetilcisteina", "fluimucil", "ambroxolo", "mucosolvan", "carbocisteina", "lisomucil", "bisolvon", "levodropropizina", "levotuss", "sekisan"],
+        "Pranzo",
+        "Fluidifica il catarro e calma la tosse",
+        "Bere abbondante acqua durante la giornata per favorire lo scioglimento del muco.",
+    ),
+    (
+        ["cetirizina", "zirtec", "levocetirizina", "xyzal", "desloratadina", "aerius", "loratadina", "ebastina", "kestine", "bilastina", "robena", "fexofenadina"],
+        "Sera",
+        "Antistaminico per ridurre sintomi allergici, prurito o rinite",
+        "Assumere preferibilmente la sera poiché in alcuni casi può dare lieve sonnolenza.",
+    ),
+    (
+        ["colecalciferolo", "dibase", "vitamina d", "acido folico", "folina", "ferro", "sideral", "ferrograd", "magnesio", "potassio", "polase", "enterogermina", "codex", "fermenti", "probiotic", "integratore"],
+        "Mattina",
+        "Supporta il recupero nutrizionale e l'equilibrio dell'organismo",
+        "Assumere secondo la posologia indicata sul referto.",
+    ),
+    (
+        ["pregabalin", "lyrica", "gabapentin", "neurontin", "tiocolchicoside", "muscoril", "ciclobenzaprina", "flexiban", "eperisone", "expose", "tizanidina", "sirdalud"],
+        "Sera",
+        "Rilassa la muscolatura contratta e calma il dolore nervoso/muscolare",
+        "Può dare sonnolenza; evitare di guidare subito dopo l'assunzione.",
+    ),
+    (
+        ["alprazolam", "xanax", "lorazepam", "tavor", "delorazepam", "en ", "bromazepam", "lexotan", "zolpidem", "stilnox", "melatonina", "escitalopram", "cipralex", "sertralina", "zoloft", "paroxetina"],
+        "Sera",
+        "Favorisce il riposo notturno e l'equilibrio del sistema nervoso",
+        "Non assumere bevande alcoliche e rispettare rigorosamente le dosi indicate.",
+    ),
+    (
+        ["ghiaccio", "crioterapia", "impacchi", "riposo", "tutore", "collare", "stampelle", "fisioterapia", "lavaggi nasali", "fisiologica", "collirio", "pomata", "crema", "gel", "medicazione"],
+        "Al Bisogno",
+        "Trattamento locale di supporto per favorire la guarigione",
+        "Applicare seguendo le indicazioni riportate nel referto medico.",
+    ),
+]
+
+
+def _infer_slots_from_line(line_low: str, default_slot: str) -> List[str]:
+    if any(w in line_low for w in ["al bisogno", "se dolore", "se febbre", "all'occorrenza", "in caso di dolore", "eventuale", "as needed", "prn"]):
+        return ["Al Bisogno"]
+    if any(w in line_low for w in ["3 volte", "tre volte", "ogni 8 ore", "x 3", "x3", "1 cp x 3", "colazione, pranzo e cena", "ai 3 pasti"]):
+        return ["Mattina", "Pranzo", "Sera"]
+    if any(w in line_low for w in ["2 volte", "due volte", "ogni 12 ore", "x 2", "x2", "1 cp x 2", "mattina e sera", "colazione e cena", "ore 8 e ore 20", "08:00 e 20:00"]):
+        return ["Mattina", "Sera"]
+
+    found_slots: List[str] = []
+    if any(w in line_low for w in ["mattin", "colazione", "digiuno", "ore 07", "ore 7", "ore 08", "ore 8", "ore 09", "ore 9", "08:00", "07:00", "morn", "breakfast"]):
+        found_slots.append("Mattina")
+    if any(w in line_low for w in ["pranz", "mezzogiorno", "pomeriggio", "ore 12", "ore 13", "ore 14", "ore 15", "12:00", "13:00", "14:00", "lunch", "afternoon"]):
+        found_slots.append("Pranzo")
+    if any(w in line_low for w in ["sera", "cena", "coricarsi", "notte", "letto", "ore 19", "ore 20", "ore 21", "ore 22", "20:00", "21:00", "22:00", "even", "night", "bedtime"]):
+        found_slots.append("Sera")
+
+    return found_slots if found_slots else [default_slot]
+
+
+def extract_dynamic_clinical_report(
+    text: str, lang_code: str, profile_idx: int
+) -> Dict[str, Any]:
+    raw_lines = [re.sub(r"\s+", " ", ln).strip() for ln in text.splitlines() if ln.strip()]
+    full_text_clean = "\n".join(raw_lines)
+    text_low = full_text_clean.lower()
+
+    # 1. Estrazione Paziente e Struttura/Reparto
+    patient_info = ""
+    for ln in raw_lines[:15]:
+        m_pat = re.search(
+            r"(?:paziente|assistito/?a|cognome\s+e\s+nome|nome\s+e\s+cognome|sig\.?ra|sig\.?|patient)\s*[:\-]?\s*([A-Za-zÀ-ÿ\.\s']{3,40})",
+            ln,
+            flags=re.IGNORECASE,
+        )
+        if m_pat:
+            candidate = m_pat.group(1).strip(" -|,.;:")
+            if len(candidate) >= 3:
+                patient_info = candidate
+                break
+
+    dept_info = ""
+    for ln in raw_lines[:12]:
+        if any(
+            k in ln.lower()
+            for k in [
+                "u.o.", "reparto", "divisione", "ambulatorio", "pronto soccorso",
+                "cardiologia", "ortopedia", "pediatria", "chirurgia", "medicina",
+                "radiologia", "ecografia", "risonanza", "laboratorio", "visita",
+                "neurologia", "gastroenterologia", "pneumologia", "urologia",
+                "ginecologia", "oculistica", "dermatologia", "endocrinologia", "oncologia",
+            ]
+        ):
+            dept_info = ln[:95].strip(" -|:")
+            break
+
+    # 2. Estrazione Diagnosi, Conclusioni ed Esiti dal testo reale del PDF
+    clinical_findings: List[str] = []
+    in_diag_block = False
+    doc_title_regex = re.compile(
+        r"^(?:referto\s+di\s+(?:dimissione|visita|pronto\s+soccorso)|lettera\s+di\s+dimissione|verbale\s+di\s+pronto\s+soccorso|referto\s+(?:medico|specialistico|ambulatoriale))(?:\s*[/\-].*)?$",
+        flags=re.IGNORECASE,
+    )
+    for ln in raw_lines:
+        ln_low = ln.lower()
+        if doc_title_regex.match(ln.strip()):
+            continue
+        if re.match(
+            r"^(?:diagnosi|conclusioni|esito|referto|quadro clinico|motivo del ricovero|motivo dell'accesso|quesito diagnostico|valutazione|anamnesi|decorso|esame obiettivo|risultati)\b",
+            ln_low,
+        ):
+            in_diag_block = True
+            cleaned_ln = re.sub(
+                r"^(?:diagnosi(?:\s+di\s+dimissione)?|conclusioni|esito|referto|quadro clinico|motivo del ricovero|quesito diagnostico|valutazione|esame obiettivo|risultati)\s*[:\-]?\s*",
+                "",
+                ln,
+                flags=re.IGNORECASE,
+            ).strip()
+            if len(cleaned_ln) > 6 and not cleaned_ln.endswith(":"):
+                clinical_findings.append(cleaned_ln)
+            continue
+        if re.match(r"^(?:terapia|prescrizione|trattamento|consigli|indicazioni|controlli|follow-up|raccomandazioni)\b", ln_low):
+            in_diag_block = False
+        elif in_diag_block and len(ln) > 12 and len(clinical_findings) < 4 and not ln.endswith(":"):
+            clinical_findings.append(ln)
+
+    if not clinical_findings:
+        # Se il PDF non usa intestazioni standard, prendi le frasi cliniche più informative
+        skip_header_words = ["azienda ospedaliera", "asl ", "ssn", "regione ", "cod. fisc", "p.iva", "tel.", "fax", "pagina ", "stampato il", "firma"]
+        for ln in raw_lines:
+            if len(ln) > 25 and not ln.endswith(":") and not doc_title_regex.match(ln.strip()) and not any(sw in ln.lower() for sw in skip_header_words):
+                clinical_findings.append(ln)
+                if len(clinical_findings) >= 3:
+                    break
+
+    findings_summary = " ".join(clinical_findings[:3]).strip()
+    if len(findings_summary) > 380:
+        findings_summary = findings_summary[:377].rsplit(" ", 1)[0] + "..."
+
+    # 3. Traduzione dei termini medici trovati nel PDF in parole semplici
+    explained_terms: List[str] = []
+    for term, plain_desc in CLINICAL_JARGON_MAP_IT:
+        if re.search(r"\b" + re.escape(term), text_low):
+            explained_terms.append(f"{term.capitalize()} ({plain_desc})")
+            if len(explained_terms) >= 4:
+                break
+
+    # 4. Estrazione Farmaci, Dosaggi e Terapia dal PDF
+    extracted_meds: List[Dict[str, str]] = []
+    seen_med_keys = set()
+    matched_med_lines = set()
+
+    dosage_regex = re.compile(
+        r"\b(\d+(?:[.,]\d+)?\s*(?:mg|mcg|µg|g|gr|ml|cc|ui|u\.i\.|gocce|gtt|puff|spruzzi|cp|cpr|compresse|compressa|cps|capsule|capsula|bustine|bustina|fiale|fiala|fl|supposte|applicazioni)\b(?:\s*[/x]\s*\d+\s*(?:die|giorno|ml|cp|volte)\b)?)",
+        flags=re.IGNORECASE,
+    )
+
+    in_therapy_section = False
+    for ln in raw_lines:
+        ln_low = ln.lower()
+        if re.match(r"^(?:terapia|terapia domiciliare|prescrizione|trattamento|cura|farmaci|posologia|si consiglia terapia)\b", ln_low):
+            in_therapy_section = True
+            if ln.strip().endswith(":"):
+                continue
+        elif re.match(r"^(?:controlli|prossimi passi|follow-up|visite|esami consigliati|indicazioni e controlli|note|avvertenze alla dimissione)\b", ln_low):
+            in_therapy_section = False
+            if ln.strip().endswith(":"):
+                continue
+
+        # Controlla se la riga contiene un farmaco noto del nostro dizionario
+        matched_kb = None
+        matched_kw = ""
+        for kw_list, def_slot, purpose_it, warn_it in DRUG_KNOWLEDGE_BASE:
+            for kw in kw_list:
+                if re.search(r"(?<!\w)" + re.escape(kw.strip()) + r"(?!\w)", ln_low):
+                    matched_kb = (def_slot, purpose_it, warn_it)
+                    matched_kw = kw.strip()
+                    break
+            if matched_kb:
+                break
+
+        is_exam_or_visit_line = bool(
+            re.match(r"^[\-\•\*\d\.\)\s]*(?:ripetere\s+esami|eseguire\s+esami|prenotare|visita\s+di\s+controllo|controllo\s+tra)\b", ln_low)
+        )
+        dose_match = dosage_regex.search(ln)
+        if not is_exam_or_visit_line and (
+            matched_kb
+            or (in_therapy_section and dose_match)
+            or (dose_match and any(w in ln_low for w in ["1 cp", "2 cp", "compress", "capsul", "bustin", "gocc", "fial", "puff", "mattin", "sera", "pranz", "ogni ", "al giorno", "/die", "colazione", "cena"]))
+        ):
+            matched_med_lines.add(ln.strip())
+            # Estrai nome farmaco pulito
+            clean_bullet = re.sub(r"^[\-\•\*\d\.\)\s]+", "", ln).strip()
+            clean_bullet = re.sub(r"^(?:terapia(?:\s+domiciliare)?|si\s+consiglia|prescrizione|assumere)\s*[:\-]?\s*", "", clean_bullet, flags=re.IGNORECASE).strip()
+
+            if dose_match:
+                dose_str = dose_match.group(1).strip()
+                before_dose = clean_bullet[: clean_bullet.find(dose_str)].strip(" -:,;(")
+                drug_title = before_dose if (2 <= len(before_dose) <= 45) else (matched_kw.capitalize() if matched_kw else clean_bullet[:38])
+            else:
+                drug_title = matched_kw.capitalize() if matched_kw else clean_bullet[:38].strip(" -:,;")
+                dose_str = "Secondo indicazione medica"
+
+            # Aggiungi eventuale indicazione oraria/frequenza scritta nella riga al dosaggio
+            freq_match = re.search(
+                r"((?:\d+\s*(?:cp|cpr|compress[ae]|capsul[ae]|bustin[ae]|puff|gocc[ea])\s*)?(?:ogni\s+\d+\s+ore|\d+\s+volte\s+al\s+giorno|mattina\s+e\s+sera|al\s+mattino|alla\s+sera|dopo\s+i\s+pasti|prima\s+dei\s+pasti|a\s+digiuno|al\s+bisogno|per\s+\d+\s+giorni|ore\s+\d{1,2}(?:[:.]\d{2})?))",
+                ln,
+                flags=re.IGNORECASE,
+            )
+            if freq_match:
+                freq_txt = freq_match.group(1).strip()
+                if freq_txt.lower() not in dose_str.lower():
+                    dose_str = f"{dose_str} ({freq_txt})" if dose_str != "Secondo indicazione medica" else freq_txt
+
+            def_slot = matched_kb[0] if matched_kb else "Mattina"
+            purpose_txt = matched_kb[1] if matched_kb else "Trattamento prescritto nel referto medico caricato"
+            warn_txt = matched_kb[2] if matched_kb else (clean_bullet if len(clean_bullet) <= 115 else clean_bullet[:112] + "...")
+
+            slots = _infer_slots_from_line(ln_low, def_slot)
+            for sl in slots:
+                dedup_key = f"{sl}:{drug_title.lower()[:18]}"
+                if dedup_key not in seen_med_keys:
+                    seen_med_keys.add(dedup_key)
+                    extracted_meds.append(
+                        {
+                            "fascia_oraria": sl,
+                            "farmaco": drug_title,
+                            "dosaggio": localize_dosage_string(dose_str, lang_code),
+                            "scopo_semplice": purpose_txt,
+                            "avvertenze": warn_txt,
+                        }
+                    )
+
+    # 5. Estrazione Prossimi Passi, Controlli ed Esami dal PDF
+    extracted_steps: List[str] = []
+    step_pattern = re.compile(
+        r"\b(?:controllo|visita\s+di\s+controllo|visita\s+specialistica|ripetere\s+esami|esami\s+del\s+sangue|esami\s+ematochimici|analisi|prelievo|emocromo|ecografia|radiografia|rx|tc|rmn|risonanza|ecg|holter|spirometria|gastroscopia|colonscopia|prenotare|impegnativa|medico\s+curante|mmg|pediatra|dieta|evitare|riposo|astensione|idratazione|bere|fisioterapia|riabilitazione|medicazione|sutura|follow-up|rivalutazione|tra\s+\d+|entro\s+\d+)\b",
+        flags=re.IGNORECASE,
+    )
+    for ln in raw_lines:
+        ln_strip = ln.strip()
+        ln_low = ln_strip.lower()
+        if ln_strip in matched_med_lines or ln_strip.endswith(":") or doc_title_regex.match(ln_strip) or ln_strip.isupper():
+            continue
+        if len(ln_strip) >= 18 and step_pattern.search(ln_low):
+            clean_step = re.sub(r"^[\-\•\*\d\.\)\s]+", "", ln_strip).strip()
+            if clean_step and clean_step not in extracted_steps and len(clean_step) <= 190:
+                extracted_steps.append(clean_step)
+            if len(extracted_steps) >= 5:
+                break
+
+    if not extracted_steps:
+        extracted_steps = [
+            f"Condividere questo referto ({dept_info or 'documento clinico'}) con il proprio Medico di Medicina Generale per l'inquadramento completo",
+            "Seguire le indicazioni terapeutiche e di monitoraggio riportate nel documento",
+            "Conservare il referto nella propria cartella clinica personale per i prossimi controlli",
+        ]
+
+    # Se il PDF è un referto diagnostico/esami senza farmaci espliciti, mostra le indicazioni del referto nelle fasce orarie
+    if not extracted_meds:
+        extracted_meds = [
+            {
+                "fascia_oraria": "Mattina",
+                "farmaco": "Indicazioni Cliniche del Referto",
+                "dosaggio": "Monitoraggio quotidiano",
+                "scopo_semplice": findings_summary[:110] if findings_summary else "Osservare le raccomandazioni contenute nel referto",
+                "avvertenze": extracted_steps[0] if extracted_steps else "Mostrare gli esiti al proprio medico curante.",
+            },
+            {
+                "fascia_oraria": "Al Bisogno",
+                "farmaco": "Confronto con il Medico Curante",
+                "dosaggio": "Secondo indicazione",
+                "scopo_semplice": "Valutare con il medico se integrare o modificare la terapia abituale in base al referto",
+                "avvertenze": "Non assumere nuovi farmaci di propria iniziativa senza parere medico.",
+            },
+        ]
+
+    # 6. Costruzione Riassunto Empatico Personalizzato sui dati reali del PDF
+    patient_prefix = f"per **{patient_info}** " if patient_info else ""
+    dept_prefix = f"({dept_info}) " if dept_info else ""
+    jargon_sentence = (
+        f" In parole semplici, i termini medici presenti nel documento indicano: {', '.join(explained_terms)}."
+        if explained_terms
+        else ""
+    )
+    unique_med_names = list(dict.fromkeys([m["farmaco"] for m in extracted_meds]))
+    meds_names_preview = ", ".join(unique_med_names[:4])
+
+    if lang_code == "en":
+        riassunto = (
+            f"Clinical Report Analysis {dept_prefix}: {findings_summary or 'We have analyzed your uploaded medical report.'}"
+            f"{jargon_sentence} "
+            f"Key therapeutic/clinical focus from your document: {meds_names_preview}. "
+            f"Please review the daily schedule and follow-up checklist extracted directly from your PDF below."
+        )
+    elif lang_code == "ru":
+        riassunto = (
+            f"Анализ вашего медицинского документа {dept_prefix}: «{findings_summary}»."
+            f"{jargon_sentence} "
+            f"Выявленные назначения и рекомендации из вашего PDF: {meds_names_preview}. "
+            f"Ниже представлено расписание и шаги наблюдения, извлеченные напрямую из вашего отчета."
+        )
+    else:
+        if profile_idx == 1:
+            riassunto = (
+                f"Abbiamo letto con attenzione il Suo referto medico {dept_prefix}. "
+                f"Ecco cosa dice il documento in modo semplice: «{findings_summary}»."
+                f"{jargon_sentence} "
+                f"Le indicazioni principali riguardano: {meds_names_preview}. "
+                f"Qui sotto trova gli orari ordinati e i prossimi controlli estratti dal Suo PDF."
+            )
+        else:
+            riassunto = (
+                f"Analisi del referto medico caricato {patient_prefix}{dept_prefix}: «{findings_summary}»."
+                f"{jargon_sentence} "
+                f"Dal documento sono state estratte le seguenti indicazioni terapeutiche e cliniche: {meds_names_preview}. "
+                f"Di seguito trova il piano giornaliero, i segnali da monitorare e i prossimi passi estratti dal Suo referto."
+            )
+
+    # 7. Costruzione Semaforo dei Sintomi contestuale al PDF caricato
+    verde_items = [
+        f"Evoluzione regolare secondo quanto descritto nel referto ({findings_summary[:75]}...)" if len(findings_summary) > 75 else f"Quadro clinico coerente con il referto ({findings_summary or 'parametri stabili'})",
+        "Buona tolleranza alle indicazioni terapeutiche e assenza di nuovi disturbi",
+        "Parametri vitali stabili a riposo durante il recupero",
+    ]
+    giallo_items = [
+        "Sintomi che non migliorano o si accentuano nei prossimi giorni nonostante le indicazioni del referto",
+        f"Dubbi o comparsa di effetti indesiderati legati a: {meds_names_preview}",
+        "Comparsa di febbre, dolore persistente o stanchezza insolita (contattare il Medico Curante)",
+    ]
+    rosso_items = [
+        "Improvvisa difficoltà a respirare, dolore acuto al petto o all'addome, o svenimento",
+        "Peggioramento rapido e severo dei sintomi descritti nel referto o febbre molto alta che non scende",
+        "Reazioni allergiche acute o sanguinamenti insoliti (recarsi subito in Pronto Soccorso / chiamare il 112)",
+    ]
+
+    # 8. Domande consigliate specifiche sui dati estratti dal PDF
+    first_med = extracted_meds[0]["farmaco"] if extracted_meds else "la terapia indicata"
+    first_step = extracted_steps[0][:70] if extracted_steps else "i prossimi controlli"
+    domande_items = [
+        f"Dottore, alla luce di questo referto («{findings_summary[:65]}...»), per quanti giorni devo proseguire {first_med}?" if len(findings_summary) > 65 else f"Dottore, in base a questo referto, per quanto tempo devo proseguire {first_med}?",
+        f"Quali sono i tempi esatti per eseguire: «{first_step}»?",
+        "Ci sono particolari accorgimenti su alimentazione, attività fisica o guida che devo seguire in base a questo esito?",
+    ]
+
+    return {
+        "riassunto_empatico": riassunto,
+        "terapia_oraria": extracted_meds,
+        "semaforo_sintomi": {
+            "verde": verde_items,
+            "giallo": giallo_items,
+            "rosso": rosso_items,
+        },
+        "prossimi_passi": extracted_steps,
+        "domande_consigliate": domande_items,
+    }
+
+
 def get_demo_fallback_analysis(
     text: str, language_label: str, profile_idx: int
 ) -> Dict[str, Any]:
@@ -2375,14 +2885,16 @@ def get_demo_fallback_analysis(
     lang_code = lang_cfg["code"]
 
     text_lower = text.lower()
-    if "apixaban" in text_lower or "bisoprololo" in text_lower or "fibrillazione" in text_lower:
+    # Usa i 3 casi demo predefiniti SOLO se il testo corrisponde effettivamente a uno dei 3 casi demo
+    if "sig. roberto m." in text_lower or ("hfmref" in text_lower and "apixaban (eliquis) 5 mg" in text_lower):
         case_type = "cardiologia"
-    elif "malleolo" in text_lower or "walker" in text_lower or "enoxaparina" in text_lower:
+    elif "sig.ra elena v." in text_lower or ("malleolo peroneale destro" in text_lower and "tutore pneumatico a stivaletto tipo walker" in text_lower):
         case_type = "ortopedia"
-    elif "salbutamolo" in text_lower or "bronchiolite" in text_lower or "pediatr" in text_lower:
+    elif "leonardo g., età 18 mesi" in text_lower or ("bronchiolite acuta" in text_lower and "salbutamolo (ventolin) 100 mcg" in text_lower):
         case_type = "pediatria"
     else:
-        case_type = "custom"
+        # Qualsiasi PDF o referto medico caricato/incollato dall'utente viene analizzato dinamicamente!
+        return extract_dynamic_clinical_report(text, lang_code, profile_idx)
 
     if lang_code == "en" and case_type in MULTILINGUAL_CASE_PACKS["en"]:
         return MULTILINGUAL_CASE_PACKS["en"][case_type]
@@ -2483,7 +2995,7 @@ def get_demo_fallback_analysis(
                 "Quando potrò tornare a guidare l'automobile in sicurezza?",
             ],
         }
-    elif case_type == "pediatria":
+    else:
         base_data = {
             "riassunto_empatico": (
                 "Il piccolo Leonardo ha avuto una bronchiolite/broncospasmo causata da un comune virus del raffreddore (Rhinovirus), "
@@ -2526,21 +3038,6 @@ def get_demo_fallback_analysis(
                 "Quando potrà tornare all'asilo nido senza rischiare di prendere subito un altro virus respiratorio?",
                 "Conviene continuare i lavaggi nasali quotidiani anche dopo che avrà finito i 5 giorni di Ventolin?",
             ],
-        }
-    else:
-        base_data = {
-            "riassunto_empatico": "Abbiamo analizzato il documento medico caricato. Il quadro clinico riportato è sotto controllo e le indicazioni terapeutiche servono a consolidare il miglioramento ottenuto e prevenire ricadute.",
-            "terapia_oraria": [
-                {"fascia_oraria": "Mattina", "farmaco": "Terapia del mattino", "dosaggio": "1 cp ore 08:00", "scopo_semplice": "Protezione e mantenimento dell'equilibrio clinico", "avvertenze": "Seguire gli orari indicati dopo la colazione."},
-                {"fascia_oraria": "Sera", "farmaco": "Terapia serale", "dosaggio": "1 cp ore 20:00", "scopo_semplice": "Copertura terapeutica nelle ore notturne", "avvertenze": "Assumere con regolarità."},
-            ],
-            "semaforo_sintomi": {
-                "verde": ["Graduale miglioramento dei sintomi nei prossimi giorni", "Parametri vitali stabili a riposo"],
-                "giallo": ["Sintomi che non migliorano dopo 3-5 giorni di terapia", "Comparsa di lievi effetti indesiderati"],
-                "rosso": ["Difficoltà respiratoria improvvisa o dolore toracico acuto", "Febbre elevata persistente o svenimento"],
-            },
-            "prossimi_passi": ["Condividere la lettera di dimissione con il proprio Medico Curante", "Prenotare gli esami di controllo indicati"],
-            "domande_consigliate": ["Per quanto tempo dovrò proseguire questa terapia?", "Ci sono alimenti o farmaci da evitare?", "Quando posso riprendere le normali attività?"],
         }
 
     if lang_code in LOCALIZED_TEMPLATES:
@@ -3548,6 +4045,12 @@ def init_session_state() -> None:
         st.session_state.active_case_label = DEMO_CASES["cardiologia"]["titolo"]
     if "analysis_result" not in st.session_state:
         st.session_state.analysis_result = None
+    if "last_analyzed_text" not in st.session_state:
+        st.session_state.last_analyzed_text = ""
+    if "last_uploaded_pdf_sig" not in st.session_state:
+        st.session_state.last_uploaded_pdf_sig = ""
+    if "pdf_uploader_key" not in st.session_state:
+        st.session_state.pdf_uploader_key = 0
     if "last_lang_rendered" not in st.session_state:
         st.session_state.last_lang_rendered = "🇮🇹 Italiano"
     if "last_profile_idx" not in st.session_state:
@@ -3850,28 +4353,6 @@ def main() -> None:
     selected_model = st.session_state.selected_model
     output_language = st.session_state.output_language
 
-    # Aggiornamento automatico immediato quando si cambia lingua o profilo
-    if (
-        st.session_state.analysis_result is None
-        or st.session_state.last_lang_rendered != output_language
-        or st.session_state.last_profile_idx != st.session_state.profile_idx
-    ):
-        t0_auto = time.perf_counter()
-        parsed_auto, eng_auto = execute_smart_ai_routing(
-            medical_text=st.session_state.medical_text,
-            language_label=output_language,
-            profile_idx=st.session_state.profile_idx,
-            profile_name=current_profile_name,
-            api_key=unified_api_key,
-            evolus_base_url=evolus_base_url,
-            selected_model=selected_model,
-        )
-        st.session_state.analysis_result = parsed_auto
-        st.session_state.last_engine_used = eng_auto
-        st.session_state.last_latency = max(0.42, time.perf_counter() - t0_auto)
-        st.session_state.last_lang_rendered = output_language
-        st.session_state.last_profile_idx = st.session_state.profile_idx
-
     # Banner dedicato quando è attiva la Modalità Daltonici (Okabe-Ito)
     if is_colorblind_mode:
         st.markdown(
@@ -3904,8 +4385,11 @@ def main() -> None:
     with c1:
         if st.button(ui["case1_btn"], use_container_width=True, type="secondary", key="btn_demo_case1"):
             st.session_state.medical_text = DEMO_CASES["cardiologia"]["testo"]
+            st.session_state["medical_editor_area"] = st.session_state.medical_text
             st.session_state.active_case_key = "cardiologia"
             st.session_state.active_case_label = ui["case1_btn"]
+            st.session_state.last_uploaded_pdf_sig = ""
+            st.session_state.pdf_uploader_key += 1
             st.session_state.analysis_result = None
             st.session_state.chat_messages = [
                 {"role": "assistant", "content": ui["chat_welcome"]}
@@ -3914,8 +4398,11 @@ def main() -> None:
     with c2:
         if st.button(ui["case2_btn"], use_container_width=True, type="secondary", key="btn_demo_case2"):
             st.session_state.medical_text = DEMO_CASES["ortopedia"]["testo"]
+            st.session_state["medical_editor_area"] = st.session_state.medical_text
             st.session_state.active_case_key = "ortopedia"
             st.session_state.active_case_label = ui["case2_btn"]
+            st.session_state.last_uploaded_pdf_sig = ""
+            st.session_state.pdf_uploader_key += 1
             st.session_state.analysis_result = None
             st.session_state.chat_messages = [
                 {"role": "assistant", "content": ui["chat_welcome"]}
@@ -3924,8 +4411,11 @@ def main() -> None:
     with c3:
         if st.button(ui["case3_btn"], use_container_width=True, type="secondary", key="btn_demo_case3"):
             st.session_state.medical_text = DEMO_CASES["pediatria"]["testo"]
+            st.session_state["medical_editor_area"] = st.session_state.medical_text
             st.session_state.active_case_key = "pediatria"
             st.session_state.active_case_label = ui["case3_btn"]
+            st.session_state.last_uploaded_pdf_sig = ""
+            st.session_state.pdf_uploader_key += 1
             st.session_state.analysis_result = None
             st.session_state.chat_messages = [
                 {"role": "assistant", "content": ui["chat_welcome"]}
@@ -3934,19 +4424,53 @@ def main() -> None:
 
     col_pdf, col_editor = st.columns([1, 2.3])
     with col_pdf:
-        uploaded_pdf = st.file_uploader(ui["pdf_label"], type=["pdf"])
-        if uploaded_pdf is not None and HAS_PYPDF:
-            try:
-                reader = PdfReader(uploaded_pdf)
-                extracted = "\n".join(
-                    [page.extract_text() or "" for page in reader.pages]
-                ).strip()
+        uploaded_pdf = st.file_uploader(
+            ui["pdf_label"],
+            type=["pdf"],
+            key=f"pdf_uploader_{st.session_state.pdf_uploader_key}",
+        )
+        if uploaded_pdf is not None:
+            pdf_sig = f"{uploaded_pdf.name}:{uploaded_pdf.size}"
+            if pdf_sig != st.session_state.last_uploaded_pdf_sig:
+                extracted = ""
+                num_pages = 0
+                if HAS_PYPDF:
+                    try:
+                        uploaded_pdf.seek(0)
+                        reader = PdfReader(uploaded_pdf)
+                        num_pages = len(reader.pages)
+                        pages_txt: List[str] = []
+                        for page in reader.pages:
+                            t_p = page.extract_text() or ""
+                            if not t_p.strip():
+                                try:
+                                    t_p = page.extract_text(extraction_mode="layout") or ""
+                                except Exception:
+                                    pass
+                            if t_p.strip():
+                                pages_txt.append(t_p.strip())
+                        extracted = "\n\n".join(pages_txt).strip()
+                    except Exception as exc:
+                        st.error(f"PDF Error: {exc}")
+
+                st.session_state.last_uploaded_pdf_sig = pdf_sig
                 if extracted:
                     st.session_state.medical_text = extracted
-                    st.session_state.active_case_label = f"📄 PDF: {uploaded_pdf.name}"
-                    st.success(f"PDF ({len(reader.pages)} pages)")
-            except Exception as exc:
-                st.error(f"PDF Error: {exc}")
+                else:
+                    st.session_state.medical_text = (
+                        f"REFERTO MEDICO PDF: {uploaded_pdf.name} ({num_pages} pagine).\n"
+                        f"Diagnosi / Esito: Documento PDF caricato ({uploaded_pdf.name}). "
+                        f"Nota: Questo PDF sembra essere una scansione fotografica senza testo digitale selezionabile; "
+                        f"puoi incollare o aggiungere qui eventuali dettagli specifici del referto."
+                    )
+                st.session_state["medical_editor_area"] = st.session_state.medical_text
+                st.session_state.active_case_key = "custom_pdf"
+                st.session_state.active_case_label = f"📄 PDF: {uploaded_pdf.name}"
+                st.session_state.analysis_result = None
+                st.session_state.chat_messages = [
+                    {"role": "assistant", "content": ui["chat_welcome"]}
+                ]
+            st.success(f"✅ {uploaded_pdf.name}")
 
         st.markdown(
             f"""
@@ -3962,12 +4486,18 @@ def main() -> None:
         )
 
     with col_editor:
+        if "medical_editor_area" not in st.session_state:
+            st.session_state["medical_editor_area"] = st.session_state.medical_text
         edited_text = st.text_area(
             ui["editor_label"],
-            value=st.session_state.medical_text,
             height=210,
+            key="medical_editor_area",
         )
-        st.session_state.medical_text = edited_text
+        if edited_text != st.session_state.medical_text:
+            st.session_state.medical_text = edited_text
+            if not str(st.session_state.active_case_label).startswith("📄 PDF:"):
+                st.session_state.active_case_key = "custom_text"
+                st.session_state.active_case_label = "✏️ Referto Personalizzato"
 
     word_count, detected_abbrs = analyze_text_complexity(st.session_state.medical_text)
     abbr_chips_html = "".join(
@@ -4001,7 +4531,15 @@ def main() -> None:
             key="btn_main_analyze",
         )
 
-    if analyze_btn:
+    # Analisi automatica immediata quando si carica un PDF, si modifica il testo,
+    # si clicca il bottone Analizza, oppure si cambia lingua/profilo
+    if (
+        analyze_btn
+        or st.session_state.analysis_result is None
+        or st.session_state.last_analyzed_text != st.session_state.medical_text.strip()
+        or st.session_state.last_lang_rendered != output_language
+        or st.session_state.last_profile_idx != st.session_state.profile_idx
+    ):
         if st.session_state.medical_text.strip():
             t_start = time.perf_counter()
             with st.spinner(f"🧠 {output_language}..."):
@@ -4014,20 +4552,18 @@ def main() -> None:
                     evolus_base_url=evolus_base_url,
                     selected_model=selected_model,
                 )
-                elapsed = time.perf_counter() - t_start
+                elapsed = max(0.38, time.perf_counter() - t_start)
                 st.session_state.analysis_result = parsed_json
+                st.session_state.last_analyzed_text = st.session_state.medical_text.strip()
                 st.session_state.last_latency = elapsed
                 st.session_state.last_throughput = max(
                     92, min(198, int(480 / max(elapsed, 0.28)))
                 )
                 st.session_state.last_engine_used = engine_label
-                st.session_state.inference_count += 1
+                if analyze_btn:
+                    st.session_state.inference_count += 1
                 st.session_state.last_lang_rendered = output_language
                 st.session_state.last_profile_idx = st.session_state.profile_idx
-                st.session_state.chat_messages = [
-                    {"role": "assistant", "content": ui["chat_welcome"]}
-                ]
-                st.rerun()
 
     result: Dict[str, Any] = st.session_state.analysis_result or get_demo_fallback_analysis(
         st.session_state.medical_text, output_language, st.session_state.profile_idx
