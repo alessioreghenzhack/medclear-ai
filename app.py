@@ -1270,9 +1270,9 @@ def inject_custom_css(
             border: 1px solid {border_card};
         }}
         .stat-high {{
-            background: #fef2f2;
-            color: #b91c1c;
-            border: 1px solid #fecaca;
+            background: {"rgba(239, 68, 68, 0.2)" if is_dark else "#fef2f2"};
+            color: {"#fca5a5" if is_dark else "#b91c1c"};
+            border: 1px solid {"#ef4444" if is_dark else "#fecaca"};
         }}
         .abbr-chip {{
             background: {dose_bg};
@@ -1513,6 +1513,168 @@ def inject_custom_css(
             font-size: 0.75rem;
             color: #10b981;
             font-weight: 700;
+        }}
+
+        /* =========================================================
+           STYLING COMPLETO COMPONENTI NATIVI STREAMLIT (DARK & LIGHT)
+           Elimina qualsiasi box bianco residuo in Dark Mode!
+           ========================================================= */
+        [data-testid="stWidgetLabel"] p,
+        [data-testid="stWidgetLabel"] span,
+        label,
+        .stMarkdown p,
+        .stMarkdown li,
+        .stMarkdown h1, .stMarkdown h2, .stMarkdown h3, .stMarkdown h4, .stMarkdown h5 {{
+            color: {text_primary} !important;
+        }}
+
+        /* Expander (Pannello di Controllo Rapido & Testo Originale) */
+        [data-testid="stExpander"],
+        [data-testid="stExpander"] details {{
+            background-color: {bg_card} !important;
+            border: 1px solid {border_card} !important;
+            border-radius: 14px !important;
+            color: {text_primary} !important;
+        }}
+        [data-testid="stExpander"] summary,
+        [data-testid="stExpander"] summary:hover {{
+            background-color: {bg_card} !important;
+            color: {text_primary} !important;
+            border-radius: 14px !important;
+        }}
+        [data-testid="stExpander"] summary p,
+        [data-testid="stExpander"] summary span,
+        [data-testid="stExpander"] summary svg {{
+            color: {text_primary} !important;
+            fill: {text_primary} !important;
+        }}
+        [data-testid="stExpanderDetails"] {{
+            background-color: {bg_card} !important;
+            color: {text_primary} !important;
+            border-top: 1px solid {border_card} !important;
+        }}
+
+        /* Selectbox, TextInput e Menu a Tendina (BaseWeb) */
+        div[data-baseweb="select"] > div,
+        div[data-baseweb="base-input"],
+        div[data-baseweb="input"] {{
+            background-color: {bg_subcard} !important;
+            color: {text_primary} !important;
+            border-color: {border_card} !important;
+            border-radius: 10px !important;
+        }}
+        div[data-baseweb="select"] span,
+        div[data-baseweb="select"] div,
+        div[data-baseweb="select"] svg {{
+            color: {text_primary} !important;
+            fill: {text_primary} !important;
+        }}
+        div[data-baseweb="popover"],
+        div[data-baseweb="menu"],
+        ul[role="listbox"],
+        div[role="listbox"] {{
+            background-color: {bg_card} !important;
+            color: {text_primary} !important;
+            border: 1px solid {border_card} !important;
+        }}
+        li[role="option"],
+        div[role="option"] {{
+            background-color: {bg_card} !important;
+            color: {text_primary} !important;
+        }}
+        li[role="option"]:hover,
+        li[role="option"][aria-selected="true"],
+        div[role="option"]:hover {{
+            background-color: {dose_bg} !important;
+            color: {dose_text} !important;
+        }}
+
+        /* TextArea (Editor Lettera di Dimissione) */
+        div[data-baseweb="textarea"],
+        div[data-baseweb="textarea"] > div,
+        .stTextArea textarea,
+        .stTextInput input {{
+            background-color: {bg_subcard} !important;
+            color: {text_primary} !important;
+            -webkit-text-fill-color: {text_primary} !important;
+            border-color: {border_card} !important;
+            caret-color: {text_primary} !important;
+            border-radius: 12px !important;
+        }}
+
+        /* File Uploader PDF (Dropzone e Bottone Browse files) */
+        [data-testid="stFileUploader"],
+        [data-testid="stFileUploaderDropzone"],
+        [data-testid="stFileUploader"] section {{
+            background-color: {bg_subcard} !important;
+            color: {text_primary} !important;
+            border: 1.5px dashed {border_card} !important;
+            border-radius: 12px !important;
+        }}
+        [data-testid="stFileUploaderDropzone"] div,
+        [data-testid="stFileUploaderDropzone"] span,
+        [data-testid="stFileUploaderDropzone"] small,
+        [data-testid="stFileUploaderDropzone"] svg {{
+            color: {text_secondary} !important;
+            fill: {text_secondary} !important;
+        }}
+        [data-testid="stFileUploaderDropzone"] button {{
+            background-color: {bg_card} !important;
+            color: {text_primary} !important;
+            border: 1px solid {border_card} !important;
+            border-radius: 10px !important;
+        }}
+
+        /* Code Block (Testo Medico Originale nell'Expander) */
+        [data-testid="stCodeBlock"],
+        [data-testid="stCode"],
+        .stCode pre,
+        pre,
+        code {{
+            background-color: {bg_subcard} !important;
+            color: {text_primary} !important;
+            border: 1px solid {border_card} !important;
+            border-radius: 10px !important;
+        }}
+
+        /* Chat Messages & Chat Input (Barra inferiore fissa) */
+        [data-testid="stChatMessage"] {{
+            background-color: {bg_card} !important;
+            border: 1px solid {border_card} !important;
+            border-radius: 14px !important;
+            padding: 0.85rem 1rem !important;
+            margin-bottom: 0.6rem !important;
+            color: {text_primary} !important;
+        }}
+        [data-testid="stChatMessage"] p,
+        [data-testid="stChatMessage"] li,
+        [data-testid="stChatMessage"] span,
+        [data-testid="stChatMessage"] strong {{
+            color: {text_primary} !important;
+        }}
+        [data-testid="stBottom"],
+        [data-testid="stBottom"] > div,
+        [data-testid="stBottomBlockContainer"] {{
+            background-color: {bg_page} !important;
+            background: {bg_page} !important;
+        }}
+        [data-testid="stChatInput"],
+        [data-testid="stChatInput"] > div,
+        [data-testid="stChatInputContainer"] {{
+            background-color: {bg_subcard} !important;
+            border-color: {border_card} !important;
+            color: {text_primary} !important;
+            border-radius: 14px !important;
+        }}
+        [data-testid="stChatInput"] textarea {{
+            background-color: transparent !important;
+            color: {text_primary} !important;
+            -webkit-text-fill-color: {text_primary} !important;
+            caret-color: {text_primary} !important;
+        }}
+        [data-testid="stChatInput"] textarea::placeholder {{
+            color: {text_secondary} !important;
+            -webkit-text-fill-color: {text_secondary} !important;
         }}
 
         div.stButton > button,
@@ -2588,48 +2750,339 @@ PATIENT QUESTION:
         except Exception:
             pass
 
-    time.sleep(0.32)
-    q_low = question.lower()
+    time.sleep(0.28)
+    q_clean = question.strip()
+    q_low = q_clean.lower()
     text_low = medical_text.lower()
     is_ortho = "walker" in text_low or "malleolo" in text_low or "enoxaparina" in text_low
+    is_peds = "pediatr" in text_low or "bronchiolit" in text_low or "salbutamolo" in text_low
 
     terapia_list = parsed_result.get("terapia_oraria", [])
+    semaforo = parsed_result.get("semaforo_sintomi", {})
+    verde_list = semaforo.get("verde", [])
+    giallo_list = semaforo.get("giallo", [])
+    rosso_list = semaforo.get("rosso", [])
+    passi_list = parsed_result.get("prossimi_passi", [])
+    domande_list = parsed_result.get("domande_consigliate", [])
+
     farmaci_str = ", ".join(
         [f"{m.get('farmaco', '')} ({m.get('dosaggio', '')})" for m in terapia_list]
     )
-    passi_list = parsed_result.get("prossimi_passi", [])
-    passi_str = " • ".join(str(p) for p in passi_list[:3])
-    red_flags = parsed_result.get("semaforo_sintomi", {}).get("rosso", [])
-    red_str = red_flags[0] if red_flags else ""
+    passi_str = "\n".join([f"- 📌 {p}" for p in passi_list])
+    verde_str = "\n".join([f"- 🟢 {v}" for v in verde_list])
+    giallo_str = "\n".join([f"- 🟡 {g}" for g in giallo_list])
+    rosso_str = "\n".join([f"- 🔴 {r}" for r in rosso_list])
 
-    # Rilevamento multilingua dell'intento della domanda (13 lingue)
+    # 1. CONTROLLO SE L'UTENTE CHIEDE DI UN FARMACO SPECIFICO PRESENTE NEL PIANO
+    matched_meds = []
+    drug_aliases = {
+        "bisoprololo": ["bisoprolol", "congor", "cardicor", "бета", "бисопролол", "بيسوبرولول"],
+        "apixaban": ["eliquis", "anticoagulant", "scoagulant", "апиксабан", "эликвис", "أبيكسابان"],
+        "furosemide": ["lasix", "diuretic", "diuretico", "фуросемид", "лазикс", "فوروسيميد"],
+        "ramipril": ["triatec", "ace", "рамиприл", "راميبريل"],
+        "enoxaparina": ["clexane", "eparina", "puntur", "iniezi", "siring", "heparin", "injection", "эноксапарин", "клексан"],
+        "paracetamolo": ["tachipirina", "paracetamol", "acetaminophen", "febbre", "dolore", "парацетамол", "тачипирина"],
+        "omeprazolo": ["omeprazol", "gastroprotettore", "stomaco", "омепразол"],
+        "salbutamolo": ["ventolin", "puff", "distanziatore", "aerosol", "inalator", "сальбутамол", "вентолин"],
+        "betametasone": ["bentelan", "cortison", "бетаметазон", "бентелан"],
+        "soluzione fisiologica": ["lavagg", "nas", "fisiologica", "saline", "физраствор", "промыван"],
+    }
+    for med in terapia_list:
+        med_name_full = str(med.get("farmaco", ""))
+        med_low = med_name_full.lower()
+        tokens = [t for t in re.split(r"[\s\(\)/,-]+", med_low) if len(t) >= 4]
+        matched = any(t in q_low for t in tokens)
+        if not matched:
+            for base_k, aliases in drug_aliases.items():
+                if base_k in med_low and (base_k in q_low or any(a in q_low for a in aliases)):
+                    matched = True
+                    break
+        if matched:
+            matched_meds.append(med)
+
+    if matched_meds:
+        med_headers = {
+            "it": ("💊 **Dettaglio sul farmaco richiesto**", "Orario / Dose", "A cosa serve", "Come assumerlo", "ℹ️ *Disclaimer: Segua sempre le dosi prescritte dal medico.*"),
+            "en": ("💊 **Requested Medication Details**", "Schedule / Dose", "Purpose", "Instructions", "ℹ️ *Disclaimer: Always follow your doctor's exact prescription.*"),
+            "ru": ("💊 **Информация о запрашиваемом препарате**", "Время / Дозировка", "Назначение", "Как принимать", "ℹ️ *Примечание: Всегда соблюдайте дозировку, назначенную врачом.*"),
+            "es": ("💊 **Detalle del medicamento consultado**", "Horario / Dosis", "Para qué sirve", "Instrucciones", "ℹ️ *Aviso: Siga siempre la pauta indicada por su médico.*"),
+            "fr": ("💊 **Détails sur le médicament demandé**", "Horaire / Dose", "Objectif", "Instructions", "ℹ️ *Avis : Respectez toujours la prescription de votre médecin.*"),
+            "de": ("💊 **Details zum angefragten Medikament**", "Zeit / Dosis", "Zweck", "Einnahmehinweis", "ℹ️ *Hinweis: Bitte halten Sie sich an die ärztliche Verordnung.*"),
+            "ar": ("💊 **تفاصيل الدواء المطلوب**", "الموعد / الجرعة", "الغرض من الدواء", "تعليمات الاستخدام", "ℹ️ *تنبيه: التزم دائماً بالجرعة الموصوفة من الطبيب.*"),
+            "zh": ("💊 **所询药物详情**", "时间 / 剂量", "药物作用", "服用说明", "ℹ️ *声明：请严格遵医嘱服药。*"),
+        }
+        mh = med_headers.get(lang_code, med_headers["en"])
+        blocks = [f"{mh[0]} (`{q_clean}`):"]
+        for m in matched_meds:
+            blocks.append(
+                f"- **{m.get('farmaco', '')}**\n"
+                f"  - 🕒 **{mh[1]}:** `{m.get('fascia_oraria', '')}` — **{m.get('dosaggio', '')}**\n"
+                f"  - 🎯 **{mh[2]}:** {m.get('scopo_semplice', '')}\n"
+                f"  - 🍽️ **{mh[3]}:** {m.get('avvertenze', '')}"
+            )
+        blocks.append(f"\n{mh[4]}")
+        return "\n".join(blocks), time.perf_counter() - t0
+
+    # 2. DIZIONARIO GLOSSARIO SIGLE MEDICHE (SE L'UTENTE CHIEDE "COSA SIGNIFICA...")
+    abbr_explanations_it = {
+        "hfmref": "**HFmrEF** significa *Scompenso Cardiaco a frazione d'eiezione lievemente ridotta* (nel Suo referto la pompa cardiaca lavora al **45%**).",
+        "fe": "**FE (Frazione d'Eiezione)** indica la percentuale di sangue pompata dal cuore a ogni battito. Nel Suo referto è al **45%** (lievemente ridotta ma ben compensata dai farmaci).",
+        "fa": "**FA (Fibrillazione Atriale)** è un ritmo cardiaco irregolare degli atri del cuore; viene tenuto sotto controllo con il *Bisoprololo* e protetto dai coaguli con *Apixaban (Eliquis)*.",
+        "nyha": "**Classe NYHA** misura la fatica respiratoria: era **NYHA III** al ricovero (affanno anche per piccoli sforzi) ed è migliorata a **NYHA I-II** alla dimissione.",
+        "egfr": "**eGFR / IRC** indica la funzione di filtro dei reni (nel referto `54 ml/min`), motivo per cui vanno controllati creatinina e potassio (`K+`) tra 7 giorni.",
+        "ebpm": "**EBPM** significa *Eparina a Basso Peso Molecolare* (nel Suo caso *Enoxaparina / Clexane 4000 UI*), le punture sottocute sulla pancia che prevengono trombosi mentre la gamba è immobilizzata.",
+        "tvp": "**TVP** significa *Trombosi Venosa Profonda* (formazione di un coagulo nelle vene della gamba), prevenuta grazie alle punture di Enoxaparina e al movimento delle dita del piede.",
+        "spo2": "**SpO2** è la saturazione di ossigeno nel sangue misurata col saturimetro al dito (valori normali sono **≥ 95%**).",
+        "mdi": "**MDI** indica lo spray inalatore predosato (come il *Salbutamolo / Ventolin*), che nei bambini va sempre usato insieme al **distanziatore pediatrico con mascherina**.",
+    }
+    for acr, expl in abbr_explanations_it.items():
+        if re.search(r"(?<!\w)" + re.escape(acr) + r"(?!\w)", q_low):
+            return (
+                f"📖 **Spiegazione del termine medico richiesto (`{acr.upper()}`):**\n{expl}\n\n"
+                f"ℹ️ *Disclaimer Medico: Spiegazione divulgativa basata sul referto.*"
+            ), time.perf_counter() - t0
+
+    # 3. RILEVAMENTO MULTILINGUA DI 10 INTENTI CLINICI DIVERSI
     drive_keywords = [
-        "🚗", "guid", "auto", "macchina", "drive", "car", "conduc", "conduire",
-        "fahren", "auto fahren", "водить", "машин", "рул", "قيادة", "سيارة",
-        "开车", "驾驶", "керм", "авто", "ड्राइव", "गाड़ी", "ngas", "makin",
+        "🚗", "guid", "auto", "macchina", "patente", "drive", "driving", "car",
+        "conduc", "coche", "conduire", "voiture", "fahren", "водить", "машин",
+        "рул", "قيادة", "سيارة", "开车", "驾驶", "керм", "авто", "ड्राइव", "गाड़ी", "ngas", "makin",
     ]
     pill_keywords = [
-        "💊", "dimentic", "compress", "pastigl", "farmac", "miss", "forget",
-        "tablet", "pill", "dose", "olvid", "pastilla", "oubli", "comprim",
-        "vergess", "tablette", "забыл", "таблетк", "пропуст", "дозу", "نسيت",
-        "جرعة", "دواء", "漏服", "忘", "药", "uit", "pastil", "пропуск", "таблет",
-        "छूट", "दवा", "गोली", "esquec", "harroj", "kokërr",
+        "💊", "dimentic", "saltat", "doppi", "miss", "forget", "forgot", "skipped",
+        "olvid", "oubli", "vergess", "забыл", "пропуст", "نسيت", "漏服", "忘",
+        "uit", "пропуск", "छूट", "भूल", "esquec", "harroj",
+    ]
+    schedule_keywords = [
+        "orar", "quando prend", "quante volt", "terapi", "medicin", "farmac", "pastigl", "compress",
+        "schedule", "when to take", "what time", "medications", "pills", "tablets",
+        "horario", "cuándo tomar", "quand prendre", "wann einnehmen", "medikament",
+        "расписан", "когда приним", "лекарств", "таблетк", "مواعيد", "متى أتناول", "الأدوية",
+        "时间", "几点吃", "哪些药", "program", "când iau", "коли приймати", "कब लें", "quando tomar", "kur t'i marr",
+    ]
+    lifestyle_keywords = [
+        "alcol", "vino", "birra", "liquor", "caffè", "caffeina", "fumo", "sigarett",
+        "alcohol", "wine", "beer", "coffee", "caffeine", "smok", "cigarette",
+        "vino", "cerveza", "café", "fumar", "vin", "bière", "café", "fumer", "wein", "bier", "kaffee", "rauchen",
+        "алкогол", "вин", "пив", "кофе", "курить", "сигарет", "قهوة", "كحول", "تدخين", "咖啡", "酒", "抽烟",
     ]
     food_keywords = [
-        "🥗", "cibo", "aliment", "acqua", "sale", "bere", "mangiar", "dieta",
-        "food", "water", "salt", "diet", "eat", "drink", "comida", "agua", "sal",
-        "eau", "sel", "essen", "trinken", "salz", "ед", "вод", "сол", "питани",
-        "диет", "طعام", "ماء", "ملح", "أكل", "饮食", "水", "盐", "吃", "mâncare",
-        "apă", "sare", "їж", "вод", "сіль", "भोजन", "पानी", "नमक", "ushqim", "uj", "krip",
+        "🥗", "cibo", "aliment", "acqua", "sale", "bere", "mangiar", "dieta", "pasti", "colazione", "pranzo", "cena",
+        "food", "water", "salt", "diet", "eat", "drink", "meal",
+        "comida", "agua", "sal", "dieta", "eau", "sel", "essen", "trinken", "salz",
+        "ед", "вод", "сол", "питани", "диет", "طعام", "ماء", "ملح", "أكل",
+        "饮食", "水", "盐", "吃", "mâncare", "apă", "sare", "їж", "сіль", "भोजन", "पानी", "नमक", "ushqim", "uj", "krip",
+    ]
+    redflag_keywords = [
+        "🚨", "🔴", "🟡", "allarm", "pericol", "pronto soccorso", "urgenz", "emergenz", "112", "118",
+        "preoccup", "peggior", "febbre", "fiato", "affann", "dolor", "gonfi", "sangue",
+        "emergency", "urgent", "hospital", "warning", "danger", "red flag", "worry", "worse", "pain", "fever", "breath",
+        "urgencia", "peligro", "fiebre", "dolor", "urgence", "danger", "fièvre", "notfall", "warnzeichen", "schmerz",
+        "скор", "опасн", "симптом", "тревож", "боль", "температур", "одышк", "طوارئ", "خطر", "ألم", "حمى",
+        "急诊", "危险", "发烧", "呼吸", "疼痛", "urgenț", "pericol", "швидк", "небезпеч", "आपातकालीन", "खतरा", "urgjenc", "rrezik",
+    ]
+    normal_keywords = [
+        "🟢", "normal", "attes", "stanc", "debol", "tosse", "guarig", "recuper",
+        "expected", "tired", "weak", "cough", "recovery", "healing",
+        "cansad", "tos", "normalement", "fatigu", "erwartet", "müde",
+        "нормальн", "ожидаем", "слабост", "кашел", "восстановлен", "طبيعي", "تعب", "正常", "恢复", "咳嗽",
+    ]
+    followup_keywords = [
+        "📅", "visit", "controll", "esam", "analisi", "preliev", "appuntament", "prossim", "radiografi", "rx", "ecograf",
+        "follow-up", "appointment", "check-up", "blood test", "next step", "x-ray", "doctor visit",
+        "cita", "revisión", "análisis", "rendez-vous", "contrôle", "prise de sang", "termin", "kontrolle", "blutbild",
+        "осмотр", "анализ", "контрол", "врач", "рентген", "шаг", "موعد", "مراجعة", "تحاليل", "فحص",
+        "复查", "检查", "验血", "下一步", "control", "analiz", "огляд", "аналіз", "जांच", "अगले कदम", "consulta", "kontroll",
+    ]
+    activity_keywords = [
+        "🏃", "sport", "cammin", "passeggi", "lavor", "scale", "docci", "bagno", "sforz", "pesi", "muover", "stampell", "scuol", "asilo",
+        "walk", "exercise", "work", "stairs", "shower", "bath", "lift", "crutches", "school", "activity",
+        "caminar", "deporte", "trabajar", "ducha", "marcher", "travailler", "douche", "gehen", "sport", "arbeiten", "duschen",
+        "гулят", "ход", "спорт", "работ", "душ", "ванн", "нагрузк", "костыл", "сад", "مشى", "رياضة", "عمل", "استحمام",
+        "散步", "运动", "上班", "洗澡", "走路", "plimb", "munc", "duș", "гуляти", "робот", "चलना", "काम", "नहाना", "ec", "pun", "dush",
+    ]
+    diagnosis_keywords = [
+        "diagnos", "cosa ho", " cos'ho", "perché ero", "motivo del ricovero", "successo in ospedale", "riassunt", "spieg",
+        "what happened", "my diagnosis", "why was i", "summary", "explain my condition",
+        "diagnóstico", "qué tengo", "diagnostic", "qu'est-ce que j'ai", "diagnose", "was habe ich",
+        "диагноз", "что со мной", "почему я", "резюме", "объясн", "تشخيص", "ماذا لدي", "诊断", "什么病", "总结",
     ]
 
-    if any(k in q_low for k in drive_keywords):
-        topic = "drive"
-    elif any(k in q_low for k in pill_keywords):
+    if any(k in q_low for k in pill_keywords):
         topic = "pill"
+    elif any(k in q_low for k in drive_keywords):
+        topic = "drive"
+    elif any(k in q_low for k in lifestyle_keywords):
+        topic = "lifestyle"
     elif any(k in q_low for k in food_keywords):
         topic = "food"
+    elif any(k in q_low for k in redflag_keywords):
+        topic = "redflags"
+    elif any(k in q_low for k in followup_keywords):
+        topic = "followup"
+    elif any(k in q_low for k in activity_keywords):
+        topic = "activity"
+    elif any(k in q_low for k in schedule_keywords):
+        topic = "schedule"
+    elif any(k in q_low for k in normal_keywords):
+        topic = "normal"
+    elif any(k in q_low for k in diagnosis_keywords):
+        topic = "diagnosis"
     else:
+        topic = "custom_search"
+
+    if topic == "lifestyle":
+        if lang_code == "ru":
+            return (
+                "☕🍷 **Кофе, алкоголь и образ жизни после выписки:**\n"
+                "- **Алкоголь (вино, пиво, крепкие напитки):** **строго избегайте** во время приема назначенных препаратов (*Апиксабан, Пантопразол, Парацетамол/Ибупрофен или антикоагулянты*), так как алкоголь повышает риск кровотечений, раздражает желудок и резко снижает давление.\n"
+                "- **Кофе и кофеин:** при кардиологическом профиле допускается максимум **1 легкая чашка утром** (или кофе без кофеина), чтобы не провоцировать учащенное сердцебиение.\n"
+                "- **Курение:** полностью исключите активное и пассивное курение."
+            ), time.perf_counter() - t0
+        if lang_code == "en":
+            return (
+                "☕🍷 **Coffee, Alcohol & Smoking Guidance:**\n"
+                "- **Alcohol (wine, beer, spirits):** **Strictly avoid** while taking your discharge medications (*Apixaban, Enoxaparin, Pantoprazole, Paracetamol/Ibuprofen, or blood pressure drugs*), as alcohol increases bleeding risk, stomach irritation, and dizziness.\n"
+                "- **Coffee & Caffeine:** Limit to at most **1 weak cup in the morning** (or switch to decaf) to avoid triggering palpitations or blood pressure spikes.\n"
+                "- **Smoking:** Strictly avoid both active and secondhand smoke."
+            ), time.perf_counter() - t0
+        return (
+            "☕🍷 **Indicazioni su Caffè, Vino/Alcolici e Fumo:**\n"
+            "- **Vino, Birra e Alcolici:** **da evitare rigorosamente** durante la terapia prescritta (*Apixaban, Enoxaparina, Pantoprazolo, Paracetamolo o farmaci per la pressione*), perché l'alcol aumenta il rischio di sanguinamento gastrico e provoca bruschi cali di pressione.\n"
+            "- **Caffè e Caffeina:** si limiti al massimo a **1 caffè leggero al mattino** (oppure decaffeinato), perché la caffeina può accelerare il battito cardiaco e contrastare l'effetto del *Bisoprololo*.\n"
+            "- **Fumo:** eviti in modo assoluto sia il fumo attivo sia il fumo passivo."
+        ), time.perf_counter() - t0
+
+    if topic == "schedule":
+        sched_titles = {
+            "it": "💊 **Riepilogo completo degli orari dei Suoi farmaci:**",
+            "en": "💊 **Complete Daily Medication Schedule:**",
+            "ru": "💊 **Полное расписание приема ваших препаратов:**",
+            "es": "💊 **Horario completo de su medicación diaria:**",
+            "fr": "💊 **Planning complet de vos médicaments :**",
+            "de": "💊 **Vollständiger Einnahmeplan Ihrer Medikamente:**",
+            "ar": "💊 **جدول مواعيد الأدوية اليومي الكامل:**",
+            "zh": "💊 **您的每日完整服药时间表：**",
+        }
+        st_title = sched_titles.get(lang_code, sched_titles["en"])
+        med_lines = [st_title]
+        for m in terapia_list:
+            med_lines.append(
+                f"- **{m.get('fascia_oraria', '')}** → **{m.get('farmaco', '')}** (`{m.get('dosaggio', '')}`): {m.get('scopo_semplice', '')}. *{m.get('avvertenze', '')}*"
+            )
+        return "\n".join(med_lines), time.perf_counter() - t0
+
+    if topic == "followup":
+        fu_titles = {
+            "it": "📅 **Prossime visite, esami e controlli previsti dal referto:**",
+            "en": "📅 **Upcoming Visits, Blood Tests & Follow-Up Appointments:**",
+            "ru": "📅 **Предстоящие анализы, осмотры и контрольные визиты по выписке:**",
+            "es": "📅 **Próximas visitas, análisis y controles programados:**",
+            "fr": "📅 **Prochains examens, analyses et rendez-vous de suivi :**",
+            "de": "📅 **Anstehende Kontrolltermine und Untersuchungen:**",
+            "ar": "📅 **المواعيد والفحوصات والتحاليل القادمة حسب التقرير:**",
+            "zh": "📅 **出院报告安排的后续复查与化验项目：**",
+        }
+        ft = fu_titles.get(lang_code, fu_titles["en"])
+        q_doc_str = "\n".join([f"  - 💬 *“{d}”*" for d in domande_list])
+        return f"{ft}\n{passi_str}\n\n**Domande consigliate per il medico:**\n{q_doc_str}", time.perf_counter() - t0
+
+    if topic == "redflags":
+        rf_titles = {
+            "it": ("🚦 **Quando preoccuparsi (Segnali d'Allarme dal Suo Referto):**", "**🟡 Contatti il Medico / Pediatra se:**", "**🔴 Vada SUBITO in Pronto Soccorso (112) se:**"),
+            "en": ("🚦 **When to Seek Medical Help (Warning Signs from Your Report):**", "**🟡 Call Your Doctor if:**", "**🔴 Go to the Emergency Room (112/911) Immediately if:**"),
+            "ru": ("🚦 **Когда следует обратиться к врачу (Симптомы тревоги из выписки):**", "**🟡 Свяжитесь с лечащим врачом, если:**", "**🔴 НЕМЕДЛЕННО вызовите скорую помощь (103/112), если:**"),
+            "es": ("🚦 **Cuándo preocuparse (Señales de Alerta de su Informe):**", "**🟡 Contacte a su médico si:**", "**🔴 Acuda a Urgencias (112) inmediatamente si:**"),
+            "fr": ("🚦 **Quand s'inquiéter (Signes d'alerte de votre compte-rendu) :**", "**🟡 Contactez votre médecin si :**", "**🔴 Allez aux Urgences (15/112) immédiatement si :**"),
+            "de": ("🚦 **Wann Sie ärztliche Hilfe suchen sollten (Warnzeichen):**", "**🟡 Kontaktieren Sie Ihren Arzt bei:**", "**🔴 Sofort in die Notaufnahme (112) bei:**"),
+            "ar": ("🚦 **متى يجب طلب المساعدة الطبية (علامات الإنذار من تقريرك):**", "**🟡 اتصل بطبيبك في حال:**", "**🔴 توجه فوراً إلى الطوارئ (112) في حال:**"),
+            "zh": ("🚦 **何时需要就医（报告中的预警信号）：**", "**🟡 出现以下情况请联系医生：**", "**🔴 出现以下情况请立即前往急诊（120/112）：**"),
+        }
+        rt = rf_titles.get(lang_code, rf_titles["en"])
+        return f"{rt[0]}\n\n{rt[1]}\n{giallo_str}\n\n{rt[2]}\n{rosso_str}", time.perf_counter() - t0
+
+    if topic == "normal":
+        norm_titles = {
+            "it": "🟢 **Sintomi normali e attesi durante la guarigione a casa:**",
+            "en": "🟢 **Normal & Expected Symptoms During Home Recovery:**",
+            "ru": "🟢 **Нормальные ожидаемые симптомы в период восстановления дома:**",
+            "es": "🟢 **Síntomas normales y esperables durante la recuperación:**",
+            "fr": "🟢 **Symptômes normaux et attendus pendant la convalescence :**",
+            "de": "🟢 **Normale und erwartete Symptome während der Genesung:**",
+            "ar": "🟢 **الأعراض الطبيعية والمتوقعة أثناء فترة التعافي في المنزل:**",
+            "zh": "🟢 **居家康复期间的正常预期表现：**",
+        }
+        nt = norm_titles.get(lang_code, norm_titles["en"])
+        return f"{nt}\n{verde_str}\n\n*(Se invece compaiono: {rosso_list[0] if rosso_list else ''}, contatti subito il 112).*", time.perf_counter() - t0
+
+    if topic == "activity":
+        if lang_code == "ru":
+            if is_ortho:
+                act_ans = "🏃 **Двигательный режим, ходьба и гигиена (Ортопедия):**\n- **Строгий запрет опоры на правую ногу (15 дней):** передвигайтесь только на **двух костылях**, не наступая на правую стопу.\n- **Положение ноги:** держите ногу приподнятой на подушке во время отдыха, прикладывайте лед через ткань по 20 минут 3–4 раза в день.\n- **Душ и гигиена:** ортез *Walker* можно снимать **только сидя** для гигиены, не сгибая голеностоп."
+            elif is_peds:
+                act_ans = "🧸 **Режим ребенка, прогулки и детский сад (Педиатрия):**\n- **Домашний покой:** избегайте посещения яслей/детского сада и людных мест в течение **5–7 дней** до полного восстановления дыхания.\n- **Сон:** укладывайте ребенка с приподнятым изголовьем (`30°`) и регулярно проветривайте комнату (избегайте табачного дыма)."
+            else:
+                act_ans = "🏃 **Физическая активность, прогулки и душ (Кардиология):**\n- **Прогулки:** разрешены спокойные пешие прогулки по ровной поверхности без одышки; **избегайте подъема тяжестей** и резких нагрузок.\n- **Подъем с постели:** вставайте утром медленно (сначала посидите 1 минуту на краю кровати), чтобы избежать головокружения от препаратов давления.\n- **Душ:** принимайте теплый (не слишком горячий) душ, чтобы не вызвать резкого падения давления."
+            return act_ans, time.perf_counter() - t0
+        if lang_code == "en":
+            if is_ortho:
+                act_ans = "🏃 **Walking, Crutches, Showering & Activity (Orthopedics):**\n- **Strict Non-Weight-Bearing (first 15 days):** Walk only using **two crutches** without putting any weight on your right foot.\n- **Rest & Ice:** Keep your leg elevated on a pillow when sitting/lying down and apply an ice pack wrapped in a cloth for 20 minutes, 3–4 times a day.\n- **Showering:** You may briefly unstrap the *Walker* boot **only while seated** for washing, keeping the ankle completely still."
+            elif is_peds:
+                act_ans = "🧸 **Rest, Nursery/Daycare & Daily Care (Pediatrics):**\n- **Keep the child at home** away from daycare/nursery and crowded spaces for the next **5–7 days** until breathing and cough fully resolve.\n- **Sleep position:** Keep the crib mattress slightly elevated (`30°`) and ensure a smoke-free, humidified room."
+            else:
+                act_ans = "🏃 **Physical Activity, Walking & Showering (Cardiology):**\n- **Light activity:** Gentle, flat-ground walking is encouraged as tolerated without shortness of breath. **Avoid heavy lifting** or strenuous exercise until your cardiologist follow-up.\n- **Getting up:** Stand up slowly from bed or chairs to prevent dizziness caused by blood pressure medications.\n- **Showering:** Use warm (not hot) water to avoid sudden blood pressure drops."
+            return act_ans, time.perf_counter() - t0
+        if is_ortho:
+            act_ans = "🏃 **Indicazioni su Cammino, Stampelle, Doccia e Attività (Ortopedia):**\n- **Scarico assoluto per i primi 15 giorni:** deve muoversi esclusivamente con **due stampelle (bastoni canadesi)** senza **MAI appoggiare il piede destro a terra**.\n- **Riposo e Ghiaccio:** tenga la gamba sollevata su un cuscino quando è seduto o a letto e applichi ghiaccio (avvolto in un panno) per 20 minuti 3–4 volte al giorno.\n- **Doccia e Igiene:** può aprire il tutore *Walker* **solo da seduto** per lavarsi, mantenendo la caviglia ferma a 90°."
+        elif is_peds:
+            act_ans = "🧸 **Indicazioni su Riposo, Asilo Nido e Passeggiate (Pediatria):**\n- **Niente asilo nido per 5–7 giorni:** tenete il bambino a casa, lontano da luoghi affollati e assolutamente lontano dal fumo passivo fino a completa guarigione.\n- **Riposo e Sonno:** fatelo dormire con la testata del lettino rialzata di circa **30°** (un cuscino sotto il materasso) per facilitare il respiro."
+        else:
+            act_ans = "🏃 **Indicazioni su Attività Fisica, Camminate, Scale e Doccia (Cardiologia):**\n- **Passeggiate leggere:** può fare brevi passeggiate in pianura a passo tranquillo, fermandosi se sente affanno. **Eviti sforzi intensi o sollevamento di pesi**.\n- **Alzarsi dal letto:** si alzi sempre lentamente (restando seduto 1 minuto sul bordo del letto) per evitare capogiri dovuti ai farmaci per la pressione.\n- **Doccia:** usi acqua tiepida (non troppo calda) per evitare cali di pressione."
+        return act_ans, time.perf_counter() - t0
+
+    if topic == "diagnosis":
+        return (
+            f"🩺 **Sintesi della Sua Diagnosi e del Ricovero:**\n\n"
+            f"{parsed_result.get('riassunto_empatico', '')}\n\n"
+            f"📋 **Terapia prescritta alla dimissione:** {farmaci_str}"
+        ), time.perf_counter() - t0
+
+    if topic == "custom_search":
+        q_words = [
+            w for w in re.findall(r"\w+", q_low)
+            if len(w) >= 3 and w not in {"come", "cosa", "quando", "perché", "posso", "devo", "quale", "quali", "sono", "nella", "della", "what", "when", "where", "which", "have", "can", "should", "with", "from", "как", "что", "когда", "могу", "нужно", "для"}
+        ]
+        all_lines = [
+            line.strip()
+            for line in medical_text.splitlines()
+            if len(line.strip()) > 15
+        ]
+        matched_lines = [
+            line for line in all_lines
+            if any(w in line.lower() for w in q_words)
+        ]
+        if matched_lines:
+            excerpt = "\n".join([f"- 📄 *{l}*" for l in matched_lines[:3]])
+            if lang_code == "ru":
+                return (
+                    f"🔍 **Ответ по вашему вопросу («{q_clean}») на основе выписки:**\n"
+                    f"В вашем медицинском документе указаны следующие данные:\n{excerpt}\n\n"
+                    f"**Краткое пояснение для пациента:**\n{parsed_result.get('riassunto_empatico', '')}\n\n"
+                    f"ℹ️ *Медицинское примечание: При любых сомнениях обсудите этот пункт на контрольном осмотре у врача.*"
+                ), time.perf_counter() - t0
+            if lang_code == "en":
+                return (
+                    f"🔍 **Specific Answer for Your Question (“{q_clean}”):**\n"
+                    f"Here is the exact clinical information found in your discharge record:\n{excerpt}\n\n"
+                    f"**Patient Summary Context:**\n{parsed_result.get('riassunto_empatico', '')}\n\n"
+                    f"ℹ️ *Medical Disclaimer: Please review these specific values with your doctor at your follow-up visit.*"
+                ), time.perf_counter() - t0
+            return (
+                f"🔍 **Risposta specifica alla Sua domanda («{q_clean}»):**\n"
+                f"Nel Suo referto ospedaliero sono riportati questi dati specifici:\n{excerpt}\n\n"
+                f"**In parole semplici:**\n{parsed_result.get('riassunto_empatico', '')}\n\n"
+                f"ℹ️ *Disclaimer Medico: Mostri questi valori al Suo medico curante durante il prossimo controllo.*"
+            ), time.perf_counter() - t0
         topic = "general"
 
     qa_bank: Dict[str, Dict[str, str]] = {
@@ -2645,7 +3098,7 @@ PATIENT QUESTION:
             ),
             "pill": f"💊 **Cosa fare se dimentica una dose:**\nIn base al Suo piano terapeutico (**{farmaci_str}**), la regola fondamentale di sicurezza è: **NON assuma MAI una doppia dose** per compensare una compressa dimenticata (soprattutto con anticoagulanti come *Eliquis/Apixaban* o farmaci per la pressione/battito). Se se ne accorge a poche ore di distanza può assumerla, altrimenti attenda regolarmente l'orario successivo.\n\nℹ️ *Disclaimer Medico: Non modifichi mai i dosaggi senza sentire il medico.*",
             "food": f"🥗 **Alimentazione, Acqua e Sale:**\nIl Suo referto raccomanda:\n- **Poco sale:** dieta iposodica (**meno di 2 grammi di sale al giorno**), evitando insaccati, formaggi stagionati e dadi.\n- **Liquidi controllati:** bere al massimo **1,5 litri di liquidi totali al giorno** (salvo diversa indicazione pediatrica/ortopedica) e pesarsi ogni mattina a digiuno.\n- **Farmaci e pasti:** seguire gli orari della tabella ({farmaci_str}).\n\nℹ️ *Disclaimer Medico: Indicazione informativa basata sulla lettera di dimissione.*",
-            "general": f"🩺 **Risposta dal Suo Referto Clinico:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Terapia attiva:** {farmaci_str}\n- **Prossimi controlli:** {passi_str}\n- **Segnale d'allarme (Pronto Soccorso):** {red_str}\n\nℹ️ *Disclaimer Medico: Queste informazioni non sostituiscono il parere del medico curante.*",
+            "general": f"🩺 **Risposta alla Sua domanda («{q_clean}») in base al Referto Clinico:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Terapia attiva:** {farmaci_str}\n- **Prossimi controlli:** {passi_list[0] if passi_list else ''}\n- **Segnale d'allarme (Pronto Soccorso):** {rosso_list[0] if rosso_list else ''}\n\n💡 *Può chiedermi informazioni su un farmaco specifico (es. «A cosa serve il Bisoprololo?»), sugli esami da fare, se può camminare/fare la doccia, sulla dieta o sui sintomi di allarme.*",
         },
         "en": {
             "drive": (
@@ -2659,7 +3112,7 @@ PATIENT QUESTION:
             ),
             "pill": f"💊 **What to do if you miss a tablet:**\nFor your prescribed therapy (**{farmaci_str}**), the golden safety rule is: **NEVER take a double dose** to make up for a missed tablet (especially with blood thinners like *Apixaban/Eliquis* or heart rate medications). Take the next dose at the normal scheduled time (`08:00`, `14:00`, or `20:00`).\n\nℹ️ *Medical Disclaimer: Informational guidance; consult your doctor or pharmacist if unsure.*",
             "food": f"🥗 **Food, Water & Salt Rules:**\nAccording to your medical report:\n- **Low Sodium:** Keep salt intake below **2 grams per day** (avoid processed foods and salty snacks).\n- **Fluid Intake:** Limit total daily fluids to **max 1.5 liters/day** (for cardiology care) and weigh yourself every morning before breakfast.\n- **Medications with meals:** Follow your daily schedule ({farmaci_str}).\n\nℹ️ *Medical Disclaimer: Based on your hospital discharge instructions.*",
-            "general": f"🩺 **Answer Based on Your Medical Report:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Active Medications:** {farmaci_str}\n- **Next Steps:** {passi_str}\n- **Emergency Red Flag:** {red_str}\n\nℹ️ *Medical Disclaimer: This assistant provides report-based guidance and does not replace your doctor.*",
+            "general": f"🩺 **Answer for (“{q_clean}”) Based on Your Medical Report:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Active Medications:** {farmaci_str}\n- **Next Steps:** {passi_list[0] if passi_list else ''}\n- **Emergency Red Flag:** {rosso_list[0] if rosso_list else ''}\n\n💡 *Tip: You can ask about any specific medication (e.g., 'What is Apixaban for?'), your follow-up tests, physical activity/showering, or warning symptoms.*",
         },
         "ru": {
             "drive": (
@@ -2673,67 +3126,67 @@ PATIENT QUESTION:
             ),
             "pill": f"💊 **Что делать, если вы забыли принять таблетку:**\nСогласно вашему плану лечения (**{farmaci_str}**), главное правило безопасности: **НИКОГДА не принимайте двойную дозу**, чтобы компенсировать пропущенный прием (особенно при приеме антикоагулянтов *Апиксабан/Эликвис* или препаратов для пульса и давления). Примите следующую таблетку строго по расписанию (`08:00`, `14:00` или `20:00`).\n\nℹ️ *Медицинское примечание: Не меняйте дозировку без консультации с врачом.*",
             "food": f"🥗 **Правила питания, питьевого режима и употребления соли:**\nСогласно вашему выписному эпикризу:\n- **Ограничение соли:** низкосолевая диета (**менее 2 г соли в сутки**), исключите соленья, колбасы и полуфабрикаты.\n- **Контроль жидкости:** употребляйте **не более 1,5 литров жидкости в сутки** и взвешивайтесь каждое утро натощак.\n- **Прием лекарств:** соблюдайте расписание ({farmaci_str}).\n\nℹ️ *Медицинское примечание: Информация носит справочный характер на основе вашей выписки.*",
-            "general": f"🩺 **Ответ на основе вашей медицинской выписки:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Назначенные препараты:** {farmaci_str}\n- **Следующие шаги:** {passi_str}\n- **Экстренный симптом (Скорая 103/112):** {red_str}\n\nℹ️ *Медицинское примечание: Ответ основан на тексте выписки и не заменяет консультацию врача.*",
+            "general": f"🩺 **Ответ на ваш вопрос («{q_clean}») по выписке:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Назначенные препараты:** {farmaci_str}\n- **Следующие шаги:** {passi_list[0] if passi_list else ''}\n- **Экстренный симптом (Скорая 103/112):** {rosso_list[0] if rosso_list else ''}\n\n💡 *Подсказка: Вы можете спросить о конкретном лекарстве, контрольных анализах, прогулках или опасных симптомах.*",
         },
         "es": {
             "drive": "🚗 **Indicaciones sobre la conducción:**\nPor seguridad, **evite conducir durante los primeros 7–15 días** (y nunca conduzca mientras lleve la bota Walker o si nota mareos al ajustar la medicación). Espere a la revisión médica de control.\n\nℹ️ *Aviso Médico: Basado en su informe de alta; consulte siempre a su médico.*",
             "pill": f"💊 **Qué hacer si olvida una pastilla:**\nEn su tratamiento (**{farmaci_str}**), **NUNCA tome una dosis doble** para compensar un olvido (especialmente con anticoagulantes como *Eliquis/Apixaban* o fármacos cardíacos). Continúe con la siguiente toma en su horario habitual (`08:00`, `14:00` o `20:00`).\n\nℹ️ *Aviso Médico: No modifique la pauta sin consultar a su médico.*",
             "food": "🥗 **Alimentación, Agua y Sal:**\nSu informe indica:\n- **Poca sal:** dieta hiposódica (**menos de 2 g de sal al día**).\n- **Control de líquidos:** máximo **1,5 litros al día** y control de peso cada mañana en ayunas.\n\nℹ️ *Aviso Médico: Orientación informativa basada en su informe de alta.*",
-            "general": f"🩺 **Respuesta según su Informe Clínico:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Medicación prescrita:** {farmaci_str}\n- **Próximos pasos:** {passi_str}\n- **Alerta de Urgencias:** {red_str}\n\nℹ️ *Aviso Médico: No sustituye el criterio de su médico.*",
+            "general": f"🩺 **Respuesta a («{q_clean}») según su Informe Clínico:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Medicación prescrita:** {farmaci_str}\n- **Próximos pasos:** {passi_list[0] if passi_list else ''}\n- **Alerta de Urgencias:** {rosso_list[0] if rosso_list else ''}\n\nℹ️ *Aviso Médico: No sustituye el criterio de su médico.*",
         },
         "fr": {
             "drive": "🚗 **Conseils concernant la conduite :**\nPar mesure de sécurité, **évitez de conduire pendant les 7 à 15 premiers jours** suivant la sortie (et interdiction stricte avec la botte Walker à la cheville droite) jusqu'à stabilisation complète et avis médical.\n\nℹ️ *Avis Médical : Basé sur votre lettre de sortie ; demandez confirmation à votre médecin.*",
             "pill": f"💊 **Que faire en cas d'oubli d'un comprimé :**\nPour votre traitement (**{farmaci_str}**), **ne prenez JAMAIS de double dose** pour compenser un oubli (en particulier pour *Eliquis/Apixaban* ou les bêta-bloquants). Prenez simplement la dose suivante à l'heure prévue.\n\nℹ️ *Avis Médical : Information basée sur votre compte-rendu.*",
             "food": "🥗 **Alimentation, Eau et Sel :**\nVotre compte-rendu recommande :\n- **Régime hyposodé :** moins de **2 g de sel par jour**.\n- **Hydratation contrôlée :** maximum **1,5 L de liquides par jour** et pesée quotidienne le matin à jeun.\n\nℹ️ *Avis Médical : Ne remplace pas l'avis de votre médecin traitant.*",
-            "general": f"🩺 **Réponse basée sur votre Compte-Rendu :**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Traitement actif :** {farmaci_str}\n- **Prochaines étapes :** {passi_str}\n- **Signe d'urgence (15/112) :** {red_str}\n\nℹ️ *Avis Médical : Information basée sur votre dossier.*",
+            "general": f"🩺 **Réponse à (« {q_clean} ») basée sur votre Compte-Rendu :**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Traitement actif :** {farmaci_str}\n- **Prochaines étapes :** {passi_list[0] if passi_list else ''}\n- **Signe d'urgence (15/112) :** {rosso_list[0] if rosso_list else ''}\n\nℹ️ *Avis Médical : Information basée sur votre dossier.*",
         },
         "de": {
             "drive": "🚗 **Hinweise zum Autofahren:**\nBitte **verzichten Sie in den ersten 7–15 Tagen nach der Entlassung auf das Autofahren** (mit einer Walker-Orthese am rechten Bein ist das Fahren strikt verboten), bis Ihre Werte bei der Nachkontrolle überprüft wurden.\n\nℹ️ *Medizinischer Hinweis: Basierend auf Ihrem Arztbrief; fragen Sie Ihren Arzt.*",
             "pill": f"💊 **Was tun bei einer vergessenen Tablette:**\nBei Ihrer Medikation (**{farmaci_str}**) gilt: **Nehmen Sie NIEMALS die doppelte Dosis ein**, wenn Sie eine Einnahme vergessen haben. Fahren Sie zum nächsten regulären Zeitpunkt (`08:00`, `14:00` oder `20:00` Uhr) fort.\n\nℹ️ *Medizinischer Hinweis: Ersetzt keinen ärztlichen Rat.*",
             "food": "🥗 **Ernährung, Trinkmenge & Salz:**\nLaut Entlassungsbrief gilt:\n- **Salzarme Kost:** weniger als **2 g Salz pro Tag**.\n- **Flüssigkeit:** maximal **1,5 Liter pro Tag** sowie tägliches Wiegen morgens nüchtern.\n\nℹ️ *Medizinischer Hinweis: Information gemäß Ihrem Entlassungsbericht.*",
-            "general": f"🩺 **Antwort laut Ihrem Arztbrief:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Medikamente:** {farmaci_str}\n- **Nächste Schritte:** {passi_str}\n- **Notfall-Warnzeichen:** {red_str}\n\nℹ️ *Medizinischer Hinweis: Dient nur zur Information.*",
+            "general": f"🩺 **Antwort zu („{q_clean}“) laut Ihrem Arztbrief:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Medikamente:** {farmaci_str}\n- **Nächste Schritte:** {passi_list[0] if passi_list else ''}\n- **Notfall-Warnzeichen:** {rosso_list[0] if rosso_list else ''}\n\nℹ️ *Medizinischer Hinweis: Dient nur zur Information.*",
         },
         "ar": {
             "drive": "🚗 **إرشادات قيادة السيارة:**\nلأجل سلامتك، **يُنصح بتجنب قيادة السيارة خلال أول 7 إلى 15 يوماً** بعد الخروج من المستشفى (ويُمنع القيادة تماماً أثناء ارتداء جبيرة الكاحل Walker) حتى استقرار الضغط والنبض ومراجعة الطبيب.\n\nℹ️ *تنبيه طبي: إرشادات مبنية على تقرير الخروج ولا تغني عن استشارة الطبيب.*",
             "pill": f"💊 **ماذا تفعل إذا نسيت جرعة الدواء:**\nبالنسبة لأدويتك الموصوفة (**{farmaci_str}**)، القاعدة الذهبية هي: **لا تتناول أبداً جرعة مضاعفة** لتعويض الجرعة المنسية (خاصة مع مميعات الدم مثل *Apixaban/Eliquis*). انتظر موعد الجرعة التالية المعتاد.\n\nℹ️ *تنبيه طبي: استشر طبيبك دائماً عند الشك.*",
             "food": "🥗 **تعليمات الطعام والماء والملح:**\nيوصي تقريرك الطبي بما يلي:\n- **تقليل الملح:** أقل من **2 جرام يومياً**.\n- **السوائل:** بحد أقصى **1.5 لتر يومياً** مع قياس الوزن كل صباح قبل الإفطار.\n\nℹ️ *تنبيه طبي: معلومات مستخرجة من تقرير الخروج الخاص بك.*",
-            "general": f"🩺 **الإجابة بناءً على تقريرك الطبي:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **الأدوية الموصوفة:** {farmaci_str}\n- **الخطوات القادمة:** {passi_str}\n- **علامات الطوارئ:** {red_str}\n\nℹ️ *تنبيه طبي: هذه المعلومات استرشادية ولا تغني عن الطبيب.*",
+            "general": f"🩺 **الإجابة على سؤالك («{q_clean}») بناءً على تقريرك الطبي:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **الأدوية الموصوفة:** {farmaci_str}\n- **الخطوات القادمة:** {passi_list[0] if passi_list else ''}\n- **علامات الطوارئ:** {rosso_list[0] if rosso_list else ''}\n\nℹ️ *تنبيه طبي: هذه المعلومات استرشادية ولا تغني عن الطبيب.*",
         },
         "zh": {
             "drive": "🚗 **关于驾驶的建议：**\n为了您的安全，出院后**前 7–15 天内请勿开车**（如果右脚佩戴 Walker 支具靴则严禁驾驶），需等待血压、心率稳定并完成复查后再由医生评估。\n\nℹ️ *医疗声明：基于您的出院报告生成，具体请遵医嘱。*",
             "pill": f"💊 **如果漏服了一片药该怎么办：**\n针对您的处方药物（**{farmaci_str}**），核心安全原则是：**切勿为了补服而服用双倍剂量**（尤其是抗凝药 *Apixaban/Eliquis* 或降压控心率药物）。请按正常时间服用下一剂。\n\nℹ️ *医疗声明：如有疑问请及时联系主治医生。*",
             "food": "🥗 **饮食、饮水与吃盐规定：**\n根据您的出院小结：\n- **低盐饮食：** 每日食盐摄入量控制在 **2 克以下**。\n- **控制液体量：** 每日总饮水量不超过 **1.5 升**，并每天清晨空腹称重记录。\n\nℹ️ *医疗声明：仅供参考，不能替代医生诊疗意见。*",
-            "general": f"🩺 **根据您的出院报告解答：**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **当前用药：** {farmaci_str}\n- **后续复查：** {passi_str}\n- **急诊危险信号：** {red_str}\n\nℹ️ *医疗声明：本回答仅基于报告提供信息参考。*",
+            "general": f"🩺 **针对您的问题（“{q_clean}”）根据出院报告解答：**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **当前用药：** {farmaci_str}\n- **后续复查：** {passi_list[0] if passi_list else ''}\n- **急诊危险信号：** {rosso_list[0] if rosso_list else ''}\n\nℹ️ *医疗声明：本回答仅基于报告提供信息参考。*",
         },
         "ro": {
             "drive": "🚗 **Indicații privind șofatul:**\nPentru siguranța dvs., **evitați să conduceți în primele 7–15 zile** de la externare (iar cu orteza Walker pe piciorul drept șofatul este strict interzis) până la controlul medical.\n\nℹ️ *Notă Medicală: Informație bazată pe biletul de externare.*",
             "pill": f"💊 **Ce faceți dacă uitați o pastilă:**\nPentru schema dvs. (**{farmaci_str}**), **NU luați niciodată o doză dublă** pentru a compensa o doză uitată. Continuați cu următoarea doză la ora obișnuită (`08:00`, `14:00` sau `20:00`).\n\nℹ️ *Notă Medicală: Nu modificați dozele fără acordul medicului.*",
             "food": "🥗 **Reguli privind mâncarea, apa și sarea:**\nBiletul de externare recomandă:\n- **Regim hiposodat:** sub **2 g de sare pe zi**.\n- **Lichide:** maximum **1,5 litri pe zi** și cântărire zilnică dimineața pe nemâncate.\n\nℹ️ *Notă Medicală: Informație orientativă; consultați medicul.*",
-            "general": f"🩺 **Răspuns conform Biletului de Externare:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Medicație prescrisă:** {farmaci_str}\n- **Pașii următori:** {passi_str}\n- **Urgențe (112):** {red_str}\n\nℹ️ *Notă Medicală: Nu înlocuiește consultul medical.*",
+            "general": f"🩺 **Răspuns pentru («{q_clean}») conform Biletului de Externare:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Medicație prescrisă:** {farmaci_str}\n- **Pașii următori:** {passi_list[0] if passi_list else ''}\n- **Urgențe (112):** {rosso_list[0] if rosso_list else ''}\n\nℹ️ *Notă Medicală: Nu înlocuiește consultul medical.*",
         },
         "uk": {
             "drive": "🚗 **Рекомендації щодо водіння авто:**\nЗаради безпеки **утримайтеся від керування автомобілем у перші 7–15 днів** після виписки (а при носінні ортеза Walker на правій нозі водіння суворо заборонено) до контрольного огляду лікаря.\n\nℹ️ *Медичне застереження: На основі вашої виписки; проконсультуйтеся з лікарем.*",
             "pill": f"💊 **Що робити, якщо ви забули прийняти таблетку:**\nДля вашої терапії (**{farmaci_str}**) головне правило: **НІКОЛИ не приймайте подвійну дозу**, щоб компенсувати пропущену таблетку. Прийміть наступну дозу за графіком (`08:00`, `14:00` або `20:00`).\n\nℹ️ *Медичне застереження: Не змінюйте дозування самостійно.*",
             "food": "🥗 **Харчування, вода та сіль:**\nЗгідно з випискою:\n- **Обмеження солі:** менше **2 г солі на добу**.\n- **Контроль рідини:** до **1,5 л рідини на день** та щоденне зважування вранці натщесерце.\n\nℹ️ *Медичне застереження: Інформація має ознайомчий характер.*",
-            "general": f"🩺 **Відповідь на основі вашої виписки:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Призначені ліки:** {farmaci_str}\n- **Наступні кроки:** {passi_str}\n- **Термінова допомога (103/112):** {red_str}\n\nℹ️ *Медичне застереження: Не замінює консультацію лікаря.*",
+            "general": f"🩺 **Відповідь на («{q_clean}») на основі вашої виписки:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Призначені ліки:** {farmaci_str}\n- **Наступні кроки:** {passi_list[0] if passi_list else ''}\n- **Термінова допомога (103/112):** {rosso_list[0] if rosso_list else ''}\n\nℹ️ *Медичне застереження: Не замінює консультацію лікаря.*",
         },
         "hi": {
             "drive": "🚗 **ड्राइविंग संबंधी निर्देश:**\nसुरक्षा के लिए, अस्पताल से छुट्टी के बाद **पहले 7–15 दिनों तक गाड़ी न चलाएं** (और यदि दाएं पैर में Walker बूट पहना है तो ड्राइविंग बिल्कुल मना है) जब तक कि डॉक्टर जांच न कर लें।\n\nℹ️ *चिकित्सा अस्वीकरण: यह जानकारी आपकी रिपोर्ट पर आधारित है।*",
             "pill": f"💊 **यदि कोई गोली लेना भूल जाएं तो क्या करें:**\nआपकी दवाओं (**{farmaci_str}**) के लिए सबसे महत्वपूर्ण नियम है: छूटी हुई दवा की भरपाई के लिए **कभी भी दोगुनी खुराक (double dose) न लें**। अगली खुराक निर्धारित समय पर ही लें।\n\nℹ️ *चिकित्सा अस्वीकरण: बिना डॉक्टर की सलाह के खुराक न बदलें।*",
             "food": "🥗 **भोजन, पानी और नमक के नियम:**\nआपकी रिपोर्ट के अनुसार:\n- **कम नमक:** प्रतिदिन **2 ग्राम से कम नमक** लें।\n- **तरल पदार्थ:** दिन भर में अधिकतम **1.5 लीटर तरल** लें और रोज सुबह खाली पेट वजन करें।\n\nℹ️ *चिकित्सा अस्वीकरण: डॉक्टर की सलाह का पालन करें।*",
-            "general": f"🩺 **आपकी मेडिकल रिपोर्ट के आधार पर उत्तर:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **निर्धारित दवाएं:** {farmaci_str}\n- **अगले कदम:** {passi_str}\n- **आपातकालीन लक्षण:** {red_str}\n\nℹ️ *चिकित्सा अस्वीकरण: यह डॉक्टर की सलाह का विकल्प नहीं है।*",
+            "general": f"🩺 **आपकी मेडिकल रिपोर्ट के आधार पर (“{q_clean}”) का उत्तर:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **निर्धारित दवाएं:** {farmaci_str}\n- **अगले कदम:** {passi_list[0] if passi_list else ''}\n- **आपातकालीन लक्षण:** {rosso_list[0] if rosso_list else ''}\n\nℹ️ *चिकित्सा अस्वीकरण: यह डॉक्टर की सलाह का विकल्प नहीं है।*",
         },
         "pt": {
             "drive": "🚗 **Indicações sobre Condução:**\nPor segurança, **evite conduzir nos primeiros 7 a 15 dias** após a alta (e é estritamente proibido conduzir com a bota Walker no pé direito) até à consulta médica de reavaliação.\n\nℹ️ *Aviso Médico: Orientação baseada na nota de alta.*",
             "pill": f"💊 **O que fazer se esquecer um comprimido:**\nPara a sua medicação (**{farmaci_str}**), **NUNCA tome uma dose dupla** para compensar um esquecimento. Tome a próxima dose no horário habitual (`08:00`, `14:00` ou `20:00`).\n\nℹ️ *Aviso Médico: Consulte sempre o seu médico.*",
             "food": "🥗 **Regras sobre Comida, Água e Sal:**\nA sua nota de alta recomenda:\n- **Pouco sal:** menos de **2 g de sal por dia**.\n- **Líquidos controlados:** máximo de **1,5 litros por dia** e pesagem diária em jejum.\n\nℹ️ *Aviso Médico: Não substitui o parecer médico.*",
-            "general": f"🩺 **Resposta com base no seu Relatório:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Medicação prescrita:** {farmaci_str}\n- **Próximos passos:** {passi_str}\n- **Sinal de Urgência (112):** {red_str}\n\nℹ️ *Aviso Médico: Informação baseada no relatório clínico.*",
+            "general": f"🩺 **Resposta para («{q_clean}») com base no seu Relatório:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Medicação prescris:** {farmaci_str}\n- **Próximos passos:** {passi_list[0] if passi_list else ''}\n- **Sinal de Urgência (112):** {rosso_list[0] if rosso_list else ''}\n\nℹ️ *Aviso Médico: Informação baseada no relatório clínico.*",
         },
         "sq": {
             "drive": "🚗 **Udhëzime për Ngasjen e Makinës:**\nPër sigurinë tuaj, **shmangni ngasjen e makinës gjatë 7–15 ditëve të para** pas daljes nga spitali (dhe ndalohet rreptësisht nëse mbani tutoren Walker në këmbën e djathtë) deri në kontrollin mjekësor.\n\nℹ️ *Shënim Mjekësor: Bazuar në fletëdaljen tuaj spitalore.*",
             "pill": f"💊 **Çfarë të bëni nëse harroni një kokërr:**\nPër barnat tuaja (**{farmaci_str}**), rregulli kryesor është: **MOS merrni kurrë dozë të dyfishtë** për të zëvendësuar kokrrën e harruar. Vazhdoni me dozën e radhës sipas orarit (`08:00`, `14:00` ose `20:00`).\n\nℹ️ *Shënim Mjekësor: Mos ndryshoni dozat pa pyetur mjekun.*",
             "food": "🥗 **Rregullat për Ushqimin, Ujin dhe Kripën:**\nSipas fletëdaljes suaj:\n- **Pak kripë:** më pak se **2 gramë kripë në ditë**.\n- **Lëngjet:** maksimumi **1,5 litra në ditë** dhe peshim çdo mëngjes esëll.\n\nℹ️ *Shënim Mjekësor: Informacion orientues; konsultohuni me mjekun.*",
-            "general": f"🩺 **Përgjigje bazuar në Raportin Tuaj:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Barnat e përshkruara:** {farmaci_str}\n- **Hapat e radhës:** {passi_str}\n- **Shenjë Urgjence (112):** {red_str}\n\nℹ️ *Shënim Mjekësor: Nuk zëvendëson këshillën e mjekut.*",
+            "general": f"🩺 **Përgjigje për («{q_clean}») bazuar në Raportin Tuaj:**\n{parsed_result.get('riassunto_empatico', '')}\n\n- **Barnat e përshkruara:** {farmaci_str}\n- **Hapat e radhës:** {passi_list[0] if passi_list else ''}\n- **Shenjë Urgjence (112):** {rosso_list[0] if rosso_list else ''}\n\nℹ️ *Shënim Mjekësor: Nuk zëvendëson këshillën e mjekut.*",
         },
     }
 
@@ -2745,24 +3198,32 @@ PATIENT QUESTION:
 # COMPONENTE AUDIO TTS (WEB SPEECH API JS PER 12 LINGUE)
 # =====================================================================
 def render_interactive_tts_player(
-    text_to_speak: str, language_label: str, play_label: str, stop_label: str
+    text_to_speak: str,
+    language_label: str,
+    play_label: str,
+    stop_label: str,
+    is_dark: bool = False,
 ) -> None:
     lang_cfg = LANGUAGES_CONFIG.get(language_label, LANGUAGES_CONFIG["🇮🇹 Italiano"])
     lang_code = lang_cfg["bcp47"]
     safe_text_json = json.dumps(text_to_speak)
+    stop_bg = "#1e293b" if is_dark else "#f1f5f9"
+    stop_fg = "#f8fafc" if is_dark else "#334155"
+    stop_border = "#334155" if is_dark else "#cbd5e1"
+    status_fg = "#38bdf8" if is_dark else "#0284c7"
 
     st.components.v1.html(
         f"""
-        <div style="font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 2px 0; margin: 0;">
+        <div style="font-family: 'Plus Jakarta Sans', -apple-system, sans-serif; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 2px 0; margin: 0; background: transparent;">
             <button id="playBtn" onclick="speakSummary()"
                 style="flex: 1 1 auto; min-width: 180px; justify-content: center; background: linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color: #ffffff; border: none; border-radius: 12px; padding: 10px 14px; font-weight: 700; font-size: 0.88rem; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; box-shadow: 0 4px 12px rgba(2, 132, 199, 0.25);">
                 {html.escape(play_label)} ({lang_code})
             </button>
             <button onclick="stopSummary()"
-                style="flex: 0 0 auto; background: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; border-radius: 12px; padding: 10px 14px; font-weight: 700; font-size: 0.86rem; cursor: pointer;">
+                style="flex: 0 0 auto; background: {stop_bg}; color: {stop_fg}; border: 1px solid {stop_border}; border-radius: 12px; padding: 10px 14px; font-weight: 700; font-size: 0.86rem; cursor: pointer;">
                 {html.escape(stop_label)}
             </button>
-            <span id="ttsStatus" style="font-size: 0.8rem; color: #0284c7; font-weight: 700;"></span>
+            <span id="ttsStatus" style="font-size: 0.8rem; color: {status_fg}; font-weight: 700;"></span>
         </div>
         <script>
         function speakSummary() {{
@@ -3487,6 +3948,7 @@ def main() -> None:
         language_label=output_language,
         play_label=ui["tts_play"],
         stop_label=ui["tts_stop"],
+        is_dark=(st.session_state.theme_idx == 1),
     )
 
     # -----------------------------------------------------------------
