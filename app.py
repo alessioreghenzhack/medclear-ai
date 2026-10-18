@@ -4036,6 +4036,58 @@ def _resolve_backend_api_key() -> str:
     ).strip()
 
 
+SCANNED_PDF_WARNING_MSG = (
+    "⚠️ Documento Scansionato o Immagine Rilevata: Questo file sembra essere una scansione cartacea "
+    "o una foto senza testo selezionabile. Per garantire la precisione clinica dei dosaggi, incolla "
+    "il testo prescritto nella casella sottostante oppure prova a selezionare il testo dal file originale."
+)
+
+
+def is_valid_clinical_text(text: str, min_chars: int = 40) -> bool:
+    """Verifica che il testo estratto non sia vuoto, abbia almeno `min_chars` caratteri e contenga testo leggibile."""
+    if not text:
+        return False
+    normalized = re.sub(r"\s+", " ", text).strip()
+    if len(normalized) < min_chars:
+        return False
+    readable_chars = re.findall(
+        r"[A-Za-zÀ-ÿ0-9\u0400-\u04FF\u0600-\u06FF\u4E00-\u9FFF\u0900-\u097F]",
+        normalized,
+    )
+    min_readable = max(10, int(min_chars * 0.45))
+    return (
+        len(readable_chars) >= min_readable
+        and (len(readable_chars) / max(len(normalized), 1)) >= 0.25
+    )
+
+
+def extract_pdf_text_with_scan_check(uploaded_pdf: Any) -> Tuple[str, bool]:
+    """Estrae il testo dal PDF con pypdf e rileva se si tratta di una scansione/immagine senza testo selezionabile (<40 caratteri)."""
+    extracted = ""
+    if HAS_PYPDF and uploaded_pdf is not None:
+        try:
+            uploaded_pdf.seek(0)
+            reader = PdfReader(uploaded_pdf)
+            pages_txt: List[str] = []
+            for page in reader.pages:
+                t_p = page.extract_text() or ""
+                if not t_p.strip():
+                    try:
+                        t_p = page.extract_text(extraction_mode="layout") or ""
+                    except Exception:
+                        pass
+                if t_p.strip():
+                    pages_txt.append(t_p.strip())
+            extracted = "\n\n".join(pages_txt).strip()
+        except Exception as exc:
+            st.error(f"PDF Error: {exc}")
+            return "", False
+
+    if is_valid_clinical_text(extracted, min_chars=40):
+        return extracted, True
+    return "", False
+
+
 def init_session_state() -> None:
     if "medical_text" not in st.session_state:
         st.session_state.medical_text = DEMO_CASES["cardiologia"]["testo"]
@@ -4051,6 +4103,8 @@ def init_session_state() -> None:
         st.session_state.last_uploaded_pdf_sig = ""
     if "pdf_uploader_key" not in st.session_state:
         st.session_state.pdf_uploader_key = 0
+    if "pdf_scan_warning" not in st.session_state:
+        st.session_state.pdf_scan_warning = False
     if "last_lang_rendered" not in st.session_state:
         st.session_state.last_lang_rendered = "🇮🇹 Italiano"
     if "last_profile_idx" not in st.session_state:
@@ -4389,6 +4443,7 @@ def main() -> None:
             st.session_state.active_case_key = "cardiologia"
             st.session_state.active_case_label = ui["case1_btn"]
             st.session_state.last_uploaded_pdf_sig = ""
+            st.session_state.pdf_scan_warning = False
             st.session_state.pdf_uploader_key += 1
             st.session_state.analysis_result = None
             st.session_state.chat_messages = [
@@ -4402,6 +4457,7 @@ def main() -> None:
             st.session_state.active_case_key = "ortopedia"
             st.session_state.active_case_label = ui["case2_btn"]
             st.session_state.last_uploaded_pdf_sig = ""
+            st.session_state.pdf_scan_warning = False
             st.session_state.pdf_uploader_key += 1
             st.session_state.analysis_result = None
             st.session_state.chat_messages = [
@@ -4415,6 +4471,7 @@ def main() -> None:
             st.session_state.active_case_key = "pediatria"
             st.session_state.active_case_label = ui["case3_btn"]
             st.session_state.last_uploaded_pdf_sig = ""
+            st.session_state.pdf_scan_warning = False
             st.session_state.pdf_uploader_key += 1
             st.session_state.analysis_result = None
             st.session_state.chat_messages = [
@@ -4432,45 +4489,33 @@ def main() -> None:
         if uploaded_pdf is not None:
             pdf_sig = f"{uploaded_pdf.name}:{uploaded_pdf.size}"
             if pdf_sig != st.session_state.last_uploaded_pdf_sig:
-                extracted = ""
-                num_pages = 0
-                if HAS_PYPDF:
-                    try:
-                        uploaded_pdf.seek(0)
-                        reader = PdfReader(uploaded_pdf)
-                        num_pages = len(reader.pages)
-                        pages_txt: List[str] = []
-                        for page in reader.pages:
-                            t_p = page.extract_text() or ""
-                            if not t_p.strip():
-                                try:
-                                    t_p = page.extract_text(extraction_mode="layout") or ""
-                                except Exception:
-                                    pass
-                            if t_p.strip():
-                                pages_txt.append(t_p.strip())
-                        extracted = "\n\n".join(pages_txt).strip()
-                    except Exception as exc:
-                        st.error(f"PDF Error: {exc}")
-
+                extracted, is_readable_pdf = extract_pdf_text_with_scan_check(uploaded_pdf)
                 st.session_state.last_uploaded_pdf_sig = pdf_sig
-                if extracted:
+                if is_readable_pdf:
+                    st.session_state.pdf_scan_warning = False
                     st.session_state.medical_text = extracted
+                    st.session_state["medical_editor_area"] = extracted
+                    st.session_state.active_case_key = "custom_pdf"
+                    st.session_state.active_case_label = f"📄 PDF: {uploaded_pdf.name}"
+                    st.session_state.analysis_result = None
+                    st.session_state.chat_messages = [
+                        {"role": "assistant", "content": ui["chat_welcome"]}
+                    ]
                 else:
-                    st.session_state.medical_text = (
-                        f"REFERTO MEDICO PDF: {uploaded_pdf.name} ({num_pages} pagine).\n"
-                        f"Diagnosi / Esito: Documento PDF caricato ({uploaded_pdf.name}). "
-                        f"Nota: Questo PDF sembra essere una scansione fotografica senza testo digitale selezionabile; "
-                        f"puoi incollare o aggiungere qui eventuali dettagli specifici del referto."
-                    )
-                st.session_state["medical_editor_area"] = st.session_state.medical_text
-                st.session_state.active_case_key = "custom_pdf"
-                st.session_state.active_case_label = f"📄 PDF: {uploaded_pdf.name}"
-                st.session_state.analysis_result = None
-                st.session_state.chat_messages = [
-                    {"role": "assistant", "content": ui["chat_welcome"]}
-                ]
-            st.success(f"✅ {uploaded_pdf.name}")
+                    # Scansione o immagine PDF senza testo selezionabile (<40 caratteri):
+                    # NON invia prompt vuoto all'AI e lascia la casella pronta per l'incolla manuale
+                    st.session_state.pdf_scan_warning = True
+                    st.session_state.medical_text = ""
+                    st.session_state["medical_editor_area"] = ""
+                    st.session_state.active_case_key = "scanned_pdf"
+                    st.session_state.active_case_label = f"⚠️ Scansione PDF: {uploaded_pdf.name}"
+
+            if not st.session_state.get("pdf_scan_warning", False):
+                st.success(f"✅ {uploaded_pdf.name}")
+        else:
+            if st.session_state.last_uploaded_pdf_sig:
+                st.session_state.last_uploaded_pdf_sig = ""
+                st.session_state.pdf_scan_warning = False
 
         st.markdown(
             f"""
@@ -4488,6 +4533,16 @@ def main() -> None:
     with col_editor:
         if "medical_editor_area" not in st.session_state:
             st.session_state["medical_editor_area"] = st.session_state.medical_text
+
+        live_editor_val = str(st.session_state.get("medical_editor_area", "")).strip()
+        if st.session_state.get("pdf_scan_warning", False) and is_valid_clinical_text(
+            live_editor_val, min_chars=20
+        ):
+            st.session_state.pdf_scan_warning = False
+
+        if st.session_state.get("pdf_scan_warning", False):
+            st.warning(SCANNED_PDF_WARNING_MSG)
+
         edited_text = st.text_area(
             ui["editor_label"],
             height=210,
@@ -4495,6 +4550,8 @@ def main() -> None:
         )
         if edited_text != st.session_state.medical_text:
             st.session_state.medical_text = edited_text
+            if is_valid_clinical_text(edited_text, min_chars=20):
+                st.session_state.pdf_scan_warning = False
             if not str(st.session_state.active_case_label).startswith("📄 PDF:"):
                 st.session_state.active_case_key = "custom_text"
                 st.session_state.active_case_label = "✏️ Referto Personalizzato"
@@ -4531,42 +4588,50 @@ def main() -> None:
             key="btn_main_analyze",
         )
 
-    # Analisi automatica immediata quando si carica un PDF, si modifica il testo,
-    # si clicca il bottone Analizza, oppure si cambia lingua/profilo
-    if (
+    # Analisi automatica immediata quando si carica un PDF valido, si modifica/incolla il testo,
+    # si clicca il bottone Analizza, oppure si cambia lingua/profilo.
+    # NON invia mai un prompt vuoto o da scansione priva di testo (<40 caratteri) all'AI.
+    has_analyzable_text = is_valid_clinical_text(st.session_state.medical_text, min_chars=20)
+    if analyze_btn and not has_analyzable_text:
+        st.warning(SCANNED_PDF_WARNING_MSG)
+    elif has_analyzable_text and (
         analyze_btn
         or st.session_state.analysis_result is None
         or st.session_state.last_analyzed_text != st.session_state.medical_text.strip()
         or st.session_state.last_lang_rendered != output_language
         or st.session_state.last_profile_idx != st.session_state.profile_idx
     ):
-        if st.session_state.medical_text.strip():
-            t_start = time.perf_counter()
-            with st.spinner(f"🧠 {output_language}..."):
-                parsed_json, engine_label = execute_smart_ai_routing(
-                    medical_text=st.session_state.medical_text,
-                    language_label=output_language,
-                    profile_idx=st.session_state.profile_idx,
-                    profile_name=current_profile_name,
-                    api_key=unified_api_key,
-                    evolus_base_url=evolus_base_url,
-                    selected_model=selected_model,
-                )
-                elapsed = max(0.38, time.perf_counter() - t_start)
-                st.session_state.analysis_result = parsed_json
-                st.session_state.last_analyzed_text = st.session_state.medical_text.strip()
-                st.session_state.last_latency = elapsed
-                st.session_state.last_throughput = max(
-                    92, min(198, int(480 / max(elapsed, 0.28)))
-                )
-                st.session_state.last_engine_used = engine_label
-                if analyze_btn:
-                    st.session_state.inference_count += 1
-                st.session_state.last_lang_rendered = output_language
-                st.session_state.last_profile_idx = st.session_state.profile_idx
+        t_start = time.perf_counter()
+        with st.spinner(f"🧠 {output_language}..."):
+            parsed_json, engine_label = execute_smart_ai_routing(
+                medical_text=st.session_state.medical_text,
+                language_label=output_language,
+                profile_idx=st.session_state.profile_idx,
+                profile_name=current_profile_name,
+                api_key=unified_api_key,
+                evolus_base_url=evolus_base_url,
+                selected_model=selected_model,
+            )
+            elapsed = max(0.38, time.perf_counter() - t_start)
+            st.session_state.analysis_result = parsed_json
+            st.session_state.last_analyzed_text = st.session_state.medical_text.strip()
+            st.session_state.last_latency = elapsed
+            st.session_state.last_throughput = max(
+                92, min(198, int(480 / max(elapsed, 0.28)))
+            )
+            st.session_state.last_engine_used = engine_label
+            if analyze_btn:
+                st.session_state.inference_count += 1
+            st.session_state.last_lang_rendered = output_language
+            st.session_state.last_profile_idx = st.session_state.profile_idx
 
+    fallback_source_text = (
+        st.session_state.medical_text
+        if has_analyzable_text
+        else DEMO_CASES["cardiologia"]["testo"]
+    )
     result: Dict[str, Any] = st.session_state.analysis_result or get_demo_fallback_analysis(
-        st.session_state.medical_text, output_language, st.session_state.profile_idx
+        fallback_source_text, output_language, st.session_state.profile_idx
     )
 
     if not st.session_state.chat_messages:
